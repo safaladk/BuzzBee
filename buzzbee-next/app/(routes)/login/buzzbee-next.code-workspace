@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../buzzbee-backend"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}
