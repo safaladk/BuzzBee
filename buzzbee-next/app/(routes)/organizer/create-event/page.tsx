@@ -1,49 +1,66 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Calendar, MapPin, DollarSign, Image as ImageIcon, FileText, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { useState } from "react";
+import {
+  Calendar,
+  MapPin,
+  DollarSign,
+  Image as ImageIcon,
+  Tag,
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { useCreateEvent } from "@/hooks/queries/useEvents";
+import { CreateEventPayload } from "@/lib/types";
 
 export default function CreateEventPage() {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
-    location: '',
-    district: '',
-    category: 'Music',
+  const { mutate: createEvent, isPending } = useCreateEvent();
+
+  const [formData, setFormData] = useState<CreateEventPayload>({
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    location: "",
+    district: "",
+    category: "Music",
     price: 0,
-    image: ''
+    image: "",
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'price' ? parseFloat(value) : value
+      [name]: name === "price" ? parseFloat(value) : value,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Event created:', formData);
+    createEvent(formData);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create New Event</h1>
-          <p className="text-gray-600 mb-8">Fill in the details below to create and publish your event</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Create New Event
+          </h1>
+          <p className="text-gray-600 mb-8">
+            Fill in the details below to create and publish your event
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Event Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Event Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Event Title
+              </label>
               <input
                 type="text"
                 name="title"
@@ -57,7 +74,9 @@ export default function CreateEventPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -88,7 +107,9 @@ export default function CreateEventPage() {
 
               {/* Time */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Time
+                </label>
                 <input
                   type="time"
                   name="time"
@@ -158,7 +179,9 @@ export default function CreateEventPage() {
 
               {/* District */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  District
+                </label>
                 <select
                   name="district"
                   value={formData.district}
@@ -194,11 +217,24 @@ export default function CreateEventPage() {
 
             {/* Submit Buttons */}
             <div className="flex gap-4 pt-6 border-t border-gray-200">
-              <Button variant="ghost" className="flex-1" onClick={() => {}} icon={null} type="button">
+              <Button
+                variant="ghost"
+                className="flex-1"
+                onClick={() => {}}
+                icon={null}
+                type="button"
+              >
                 Save as Draft
               </Button>
-              <Button variant="primary" size="lg" className="flex-1" icon={null} type="submit">
-                Publish Event
+              <Button
+                variant="primary"
+                size="lg"
+                className="flex-1"
+                icon={null}
+                type="submit"
+                disabled={isPending}
+              >
+                {isPending ? "Publishing..." : "Publish Event"}
               </Button>
             </div>
           </form>

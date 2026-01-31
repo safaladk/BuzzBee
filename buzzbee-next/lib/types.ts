@@ -32,3 +32,15 @@ export interface Stat {
   value: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
+
+export interface CreateEventPayload {
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  district: string;
+  category: string;
+  price: number;
+  image?: string;
+}

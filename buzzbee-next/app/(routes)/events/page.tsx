@@ -1,41 +1,78 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Calendar, Clock, Filter } from 'lucide-react';
-import { CategoryFilter } from '@/components/ui/CategoryFilter';
-import { EventCard } from '@/components/ui/EventCard';
-import { sampleEvents, categories } from '@/lib/constants';
-import type { Event } from '@/lib/types';
-import Link from 'next/link';
+import { useState } from "react";
+import { Calendar, Clock, Filter, Search } from "lucide-react";
+import { CategoryFilter } from "@/components/ui/CategoryFilter";
+import { EventCard } from "@/components/ui/EventCard";
+import { categories } from "@/lib/constants";
+import { useEvents } from "@/hooks/queries/useEvents";
+import Link from "next/link";
 
 export default function EventsPage() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(sampleEvents);
+  const { data: events, isLoading, error } = useEvents();
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (selectedCategory === 'All') {
-      setFilteredEvents(sampleEvents);
-    } else {
-      setFilteredEvents(sampleEvents.filter((event) => event.category === selectedCategory));
-    }
-  }, [selectedCategory]);
+  const filteredEvents = events
+    ? events.filter((event) => {
+        const matchesCategory =
+          selectedCategory === "All" || event.category === selectedCategory;
+        const matchesSearch = event.title
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      })
+    : [];
+
+  if (isLoading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Error loading events
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        categories={categories}
-      />
+      <div className="bg-white border-b border-gray-200">
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          categories={categories}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="relative">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={20}
+            />
+            <input
+              type="text"
+              placeholder="Search events by title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-coral"
+            />
+          </div>
+        </div>
+      </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {selectedCategory === 'All' ? 'All Events' : `${selectedCategory} Events`}
+              {selectedCategory === "All"
+                ? "All Events"
+                : `${selectedCategory} Events`}
             </h2>
             <p className="text-gray-600">
-              {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} found
+              {filteredEvents.length} event
+              {filteredEvents.length !== 1 ? "s" : ""} found
             </p>
           </div>
 
@@ -62,8 +99,12 @@ export default function EventsPage() {
         {filteredEvents.length === 0 && (
           <div className="text-center py-20">
             <Calendar size={64} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No events found</h3>
-            <p className="text-gray-600">Try adjusting your filters or check back later</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              No events found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your filters or check back later
+            </p>
           </div>
         )}
       </main>
