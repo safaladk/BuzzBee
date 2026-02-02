@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { use } from "react";
+import { use, useMemo } from "react";
 import { Calendar, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useEvent } from "@/hooks/queries/useEvents";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -17,28 +17,57 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   const router = useRouter();
   const { data: event, isLoading, error } = useEvent(id);
 
-  if (isLoading)
+  // All hooks must be called before any conditional returns
+  const capacity = 500;
+  const sold = Math.floor(capacity * 0.68);
+  const left = Math.max(capacity - sold, 0);
+  const price = event
+    ? typeof event.price === "string"
+      ? parseFloat(event.price)
+      : (event.price ?? 0)
+    : 0;
+  const isFree = price === 0;
+
+  const dateStr = useMemo(() => {
+    if (!event) return "";
+    return new Date(event.date).toLocaleString("en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }, [event]);
+
+  // Conditional returns AFTER all hooks
+  if (isLoading && !event)
     return (
       <div className="min-h-screen flex items-center justify-center">
         Loading...
       </div>
     );
-  if (error || !event) return notFound();
+  if (error && !event) {
+    const status = (error as { status?: number })?.status;
+    if (status === 404) return notFound();
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-md p-6 text-center max-w-md">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Unable to load event
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Please ensure the backend is running and try again.
+          </p>
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-2 text-brand-coral font-semibold hover:text-brand-navy transition-colors"
+          >
+            ← Back to all events
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-  const capacity = 500; // Mock until backend has it
-  const sold = Math.floor(capacity * 0.68); // Mock
-  const left = Math.max(capacity - sold, 0);
-  const price =
-    typeof event.price === "string"
-      ? parseFloat(event.price)
-      : (event.price ?? 0);
-  const isFree = price === 0;
-
-  const dateStr = new Date(event.date).toLocaleString("en-GB", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  if (!event) return notFound();
 
   return (
     <section className="min-h-screen py-12 bg-gray-50">
@@ -63,6 +92,16 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
           {event.title}
         </h1>
+
+        {event.image && (
+          <div className="mb-6 rounded-2xl overflow-hidden shadow-md">
+            <img
+              src={event.image}
+              alt={event.title}
+              className="w-full max-h-[420px] object-cover"
+            />
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-6 text-gray-600 mb-6">
           <span className="inline-flex items-center gap-2">
@@ -104,8 +143,11 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 About This Event
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                Enjoy community, culture, and creativity at {event.title}.
-                Organized by {event.organizer || "BuzzBee Host"}.
+                {event.description ||
+                  `Enjoy community, culture, and creativity at ${event.title}.`}
+                {event.organizer
+                  ? ` Organized by ${event.organizer}.`
+                  : ""}
               </p>
             </div>
 

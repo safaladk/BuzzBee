@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Calendar } from 'lucide-react';
-import { EventCard } from '@/components/ui/EventCard';
-import { sampleEvents } from '@/lib/constants';
-import type { Event } from '@/lib/types';
+import Link from "next/link";
+import { Calendar } from "lucide-react";
+import { EventCard } from "@/components/ui/EventCard";
+import { useEvents } from "@/hooks/queries/useEvents";
+import type { Event } from "@/lib/types";
 
 function daysBetween(a: Date, b: Date) {
   const msPerDay = 24 * 60 * 60 * 1000;
@@ -15,18 +15,42 @@ function daysBetween(a: Date, b: Date) {
 }
 
 function parseISO(dateStr: string) {
-  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!dateStr) return new Date();
+  const datePart = dateStr.toString().split("T")[0];
+  const [y, m, d] = datePart.split("-").map(Number);
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
 export interface EventsAroundDateProps {
-  date?: Date; 
-  windowDays?: number; 
+  date?: Date;
+  windowDays?: number;
 }
 
-export const EventsAroundDate = ({ date = new Date(), windowDays = 3 }: EventsAroundDateProps) => {
+export const EventsAroundDate = ({
+  date = new Date(),
+  windowDays = 3,
+}: EventsAroundDateProps) => {
+  const { data: events, isLoading } = useEvents();
   const center = date;
-  const eventsAround: Event[] = sampleEvents
+
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="h-64 bg-gray-200 rounded"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const eventsAround: Event[] = (events || [])
     .filter((e) => {
       const evDate = parseISO(e.date);
       const diff = Math.abs(daysBetween(center, evDate));
@@ -34,7 +58,11 @@ export const EventsAroundDate = ({ date = new Date(), windowDays = 3 }: EventsAr
     })
     .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
 
-  const titleDate = center.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+  const titleDate = center.toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <section className="py-16 bg-white">
@@ -44,12 +72,19 @@ export const EventsAroundDate = ({ date = new Date(), windowDays = 3 }: EventsAr
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold text-brand-navy bg-brand-peach/30">
               <Calendar size={16} /> Around {titleDate}
             </div>
-            <h2 className="mt-3 text-3xl font-bold text-gray-900">Happening This Week</h2>
-                    {/* <p className="text-gray-600 mt-1">Events within */}
-                      {/* <span className="font-semibold text-brand-coral"> ±{windowDays} days</span> of {titleDate} */}
+            <h2 className="mt-3 text-3xl font-bold text-gray-900">
+              Happening This Week
+            </h2>
+            {/* <p className="text-gray-600 mt-1">Events within */}
+            {/* <span className="font-semibold text-brand-coral"> ±{windowDays} days</span> of {titleDate} */}
             {/* </p> */}
           </div>
-          <Link href="/events" className="text-brand-coral font-semibold hover:opacity-80">View all</Link>
+          <Link
+            href="/events"
+            className="text-brand-coral font-semibold hover:opacity-80"
+          >
+            View all
+          </Link>
         </div>
 
         {eventsAround.length > 0 ? (
@@ -63,10 +98,19 @@ export const EventsAroundDate = ({ date = new Date(), windowDays = 3 }: EventsAr
         ) : (
           <div className="text-center py-20">
             <Calendar size={64} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No events around this date</h3>
-            <p className="text-gray-600">Try expanding the range or browse all events</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              No events around this date
+            </h3>
+            <p className="text-gray-600">
+              Try expanding the range or browse all events
+            </p>
             <div className="mt-6">
-              <Link href="/events" className="inline-block px-5 py-3 rounded-lg bg-brand-coral text-white font-semibold hover:opacity-90">Browse Events</Link>
+              <Link
+                href="/events"
+                className="inline-block px-5 py-3 rounded-lg bg-brand-coral text-white font-semibold hover:opacity-90"
+              >
+                Browse Events
+              </Link>
             </div>
           </div>
         )}

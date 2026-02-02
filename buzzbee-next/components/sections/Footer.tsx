@@ -1,8 +1,59 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useAuth } from '../providers/AuthContext';
+import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
+
 export const Footer = () => {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [showOrganizerModal, setShowOrganizerModal] = useState(false);
+  
+  const handleCreateEventClick = (e: React.MouseEvent) => {
+    if (user?.role !== 'organizer') {
+      e.preventDefault();
+      setShowOrganizerModal(true);
+    }
+  };
+  
   return (
-    <footer className="bg-brand-navy text-white">
+    <>
+      <Modal
+        isOpen={showOrganizerModal}
+        onClose={() => setShowOrganizerModal(false)}
+        title="Organizer Access Required"
+        size="md"
+      >
+        <div className="text-center py-4">
+          <p className="text-gray-700 text-lg mb-6">
+            Become an organizer and get verified to create an event
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button
+              variant="ghost"
+              onClick={() => setShowOrganizerModal(false)}
+              icon={null}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setShowOrganizerModal(false);
+                router.push('/signup');
+              }}
+              icon={null}
+            >
+              Sign Up as Organizer
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <footer className="bg-brand-navy text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
@@ -47,14 +98,24 @@ export const Footer = () => {
             <h3 className="font-semibold text-white mb-4">For Organizers</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <Link 
+                  href="/organizer/create-event" 
+                  className="hover:text-accent transition-colors"
+                  onClick={handleCreateEventClick}
+                >
                   Create Event
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
-                  Verification
-                </a>
+                {user?.role === 'organizer' ? (
+                  <Link href="/organizer/dashboard" className="hover:text-accent transition-colors">
+                    Dashboard
+                  </Link>
+                ) : (
+                  <span className="text-white/40 cursor-not-allowed">
+                    Dashboard
+                  </span>
+                )}
               </li>
               <li>
                 <a href="#" className="hover:text-accent transition-colors">
@@ -101,5 +162,6 @@ export const Footer = () => {
         </div>
       </div>
     </footer>
+    </>
   );
 };

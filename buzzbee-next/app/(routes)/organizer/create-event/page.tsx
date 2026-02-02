@@ -39,11 +39,6 @@ export default function CreateEventPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createEvent(formData);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +50,7 @@ export default function CreateEventPage() {
             Fill in the details below to create and publish your event
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form className="space-y-6">
             {/* Event Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -67,7 +62,7 @@ export default function CreateEventPage() {
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="e.g., Summer Music Festival 2025"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                 required
               />
             </div>
@@ -83,7 +78,7 @@ export default function CreateEventPage() {
                 onChange={handleChange}
                 placeholder="Describe your event in detail..."
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                 required
               />
             </div>
@@ -100,7 +95,7 @@ export default function CreateEventPage() {
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   required
                 />
               </div>
@@ -115,7 +110,7 @@ export default function CreateEventPage() {
                   name="time"
                   value={formData.time}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   required
                 />
               </div>
@@ -130,7 +125,7 @@ export default function CreateEventPage() {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   required
                 >
                   <option value="Music">Music</option>
@@ -154,7 +149,7 @@ export default function CreateEventPage() {
                   value={formData.price}
                   onChange={handleChange}
                   placeholder="0 for free event"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                 />
               </div>
             </div>
@@ -172,7 +167,7 @@ export default function CreateEventPage() {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="e.g., Thamel, Kathmandu"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   required
                 />
               </div>
@@ -186,7 +181,7 @@ export default function CreateEventPage() {
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   required
                 >
                   <option value="">Select a district</option>
@@ -211,7 +206,7 @@ export default function CreateEventPage() {
                 value={formData.image}
                 onChange={handleChange}
                 placeholder="https://example.com/image.jpg"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
               />
             </div>
 
@@ -220,9 +215,10 @@ export default function CreateEventPage() {
               <Button
                 variant="ghost"
                 className="flex-1"
-                onClick={() => {}}
+                onClick={() => createEvent({ ...formData, isPublished: false })}
                 icon={null}
                 type="button"
+                disabled={isPending}
               >
                 Save as Draft
               </Button>
@@ -231,7 +227,8 @@ export default function CreateEventPage() {
                 size="lg"
                 className="flex-1"
                 icon={null}
-                type="submit"
+                type="button"
+                onClick={() => createEvent({ ...formData, isPublished: true })}
                 disabled={isPending}
               >
                 {isPending ? "Publishing..." : "Publish Event"}

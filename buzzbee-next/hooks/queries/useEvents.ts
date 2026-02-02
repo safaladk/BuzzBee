@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { eventService } from '@/lib/services/events';
 import { useRouter } from 'next/navigation';
+import type { Event } from '@/lib/types';
 
 export const useEvents = () => {
   return useQuery({
@@ -10,10 +11,16 @@ export const useEvents = () => {
 };
 
 export const useEvent = (id: string) => {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ['events', id],
     queryFn: () => eventService.getById(id),
     enabled: !!id,
+    initialData: () => {
+      const events = queryClient.getQueryData<Event[]>(['events']);
+      return events?.find((event) => String(event.id) === String(id));
+    },
   });
 };
 

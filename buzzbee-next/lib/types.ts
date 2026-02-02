@@ -1,6 +1,7 @@
 export interface Event {
   id: string;
   title: string;
+  description?: string;
   date: string;
   time: string;
   location: string;
@@ -8,11 +9,11 @@ export interface Event {
   price: number;
   category: string;
   image: string;
-  organizer: string;
-  verified: boolean;
-  attendees: number;
-  rating: number;
-  isFree: boolean;
+  organizer?: string;
+  verified?: boolean;
+  attendees?: number;
+  rating?: number;
+  isFree?: boolean;
 }
 
 export interface User {
@@ -43,4 +44,5 @@ export interface CreateEventPayload {
   category: string;
   price: number;
   image?: string;
+  isPublished?: boolean;
 }

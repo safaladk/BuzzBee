@@ -29,4 +29,7 @@ export class CreateEventDto {
   @IsOptional()
   @IsUrl()
   image?: string;
+
+  @IsOptional()
+  isPublished?: boolean;
 }

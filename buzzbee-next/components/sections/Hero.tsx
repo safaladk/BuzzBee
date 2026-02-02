@@ -5,7 +5,7 @@ import { Button } from '../ui/Button';
 
 export const Hero = () => {
   return (
-    <div className="relative overflow-hidden bg-brand-navy text-white">
+    <div className="relative overflow-hidden bg-black text-white">
       {/* dark overlay */}
       <div className="absolute inset-0 bg-black/20" />
 
@@ -15,7 +15,7 @@ export const Hero = () => {
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight tracking-tight">
             Discover Amazing Events
-            <span className="block text-accent drop-shadow-sm">
+            <span className="block text-white drop-shadow-sm">
               Happening Around You
             </span>
           </h1>

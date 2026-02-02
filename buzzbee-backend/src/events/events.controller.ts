@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -18,5 +18,11 @@ export class EventsController {
   @ApiOperation({ summary: 'Get all published events' })
   findAll() {
     return this.service.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get published event by id' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.service.findOne(id);
   }
 }
