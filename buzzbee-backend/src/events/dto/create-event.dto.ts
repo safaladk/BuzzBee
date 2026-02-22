@@ -1,4 +1,5 @@
-import { IsString, IsDateString, IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsDateString, IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateEventDto {
   @IsString()
@@ -23,12 +24,26 @@ export class CreateEventDto {
   district: string;
 
   @IsNumber()
+  @Type(() => Number)
   price: number;
 
   @IsString()
   @IsOptional()
-  @IsUrl()
   image?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  capacity?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  serviceFee?: number;
+
+  @IsString()
+  @IsOptional()
+  highlights?: string;
 
   @IsOptional()
   isPublished?: boolean;

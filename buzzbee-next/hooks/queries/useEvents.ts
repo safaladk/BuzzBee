@@ -32,11 +32,33 @@ export const useCreateEvent = () => {
     mutationFn: eventService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
-      router.push('/organizer/dashboard');
+      // Redirect after a brief delay to show success state if needed
+      setTimeout(() => {
+        router.push('/organizer/dashboard');
+      }, 500);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       console.error('Failed to create event:', error);
+    },
+  });
+};
+
+export const useUpdateEvent = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string | number; data: any }) => eventService.update(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['events', String(variables.id)] });
+      setTimeout(() => {
+        router.push('/organizer/dashboard');
+      }, 500);
+    },
+    onError: (error: any) => {
+      console.error('Failed to update event:', error);
     },
   });
 };

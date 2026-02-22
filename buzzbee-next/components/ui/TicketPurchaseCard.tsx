@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { ShieldCheck } from 'lucide-react';
-import { Button } from './Button';
+import { useMemo, useState } from "react";
+import { ShieldCheck } from "lucide-react";
+import { Button } from "./Button";
 
 interface Props {
   price: number;
   currency?: string;
   serviceFee?: number;
-  onBook: () => void;
+  onBook: (qty: number) => void;
   paymentOptions?: string[];
   stats?: string[];
 }
 
 export function TicketPurchaseCard({
   price,
-  currency = 'Rs.',
+  currency = "Rs.",
   serviceFee = 25,
   onBook,
   paymentOptions = [],
@@ -46,7 +46,9 @@ export function TicketPurchaseCard({
           >
             -
           </button>
-          <span className="w-6 text-center font-semibold text-gray-800">{qty}</span>
+          <span className="w-6 text-center font-semibold text-gray-800">
+            {qty}
+          </span>
           <button
             className="h-8 w-8 rounded-md bg-gray-100 text-gray-900 font-bold"
             onClick={() => setQty((q) => q + 1)}
@@ -79,15 +81,25 @@ export function TicketPurchaseCard({
       </div>
 
       <div className="mt-5">
-        <Button variant="primary" size="lg" onClick={onBook} className="w-full">
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={() => onBook(qty)}
+          className="w-full"
+        >
           Book Now
         </Button>
         {!!paymentOptions.length && (
-          <p className="text-center text-sm text-gray-500 mt-2">Secure payment via</p>
+          <p className="text-center text-sm text-gray-500 mt-2">
+            Secure payment via
+          </p>
         )}
         <div className="mt-2 flex flex-wrap gap-2 justify-center">
           {paymentOptions.map((p) => (
-            <span key={p} className="px-3 py-1 rounded-lg bg-brand-peach/40 text-brand-navy text-sm font-semibold">
+            <span
+              key={p}
+              className="px-3 py-1 rounded-lg bg-brand-peach/40 text-brand-navy text-sm font-semibold"
+            >
               {p}
             </span>
           ))}

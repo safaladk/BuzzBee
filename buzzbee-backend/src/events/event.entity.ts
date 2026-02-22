@@ -35,6 +35,18 @@ export class Event {
   @Column({ default: false })
   isPublished: boolean;
 
+  @Column({ type: 'int', default: 0 })
+  capacity: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  serviceFee: number;
+
+  @Column({ type: 'text', nullable: true })
+  highlights: string;
+
+  @Column({ type: 'int', default: 0 })
+  attendees: number;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 

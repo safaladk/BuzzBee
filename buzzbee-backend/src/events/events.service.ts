@@ -16,6 +16,25 @@ export class EventsService {
     return this.repo.save(event);
   }
 
+  async update(id: number, dto: CreateEventDto) {
+    const event = await this.repo.findOne({ where: { id } });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    Object.assign(event, dto);
+    return this.repo.save(event);
+  }
+
+  async remove(id: number) {
+    const event = await this.repo.findOne({ where: { id } });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    await this.repo.remove(event);
+    return { success: true };
+  }
+
   findAll() {
     return this.repo.find({ where: { isPublished: true } });
   }

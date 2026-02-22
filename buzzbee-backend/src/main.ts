@@ -8,7 +8,7 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
   });
 
@@ -17,6 +17,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
@@ -32,7 +33,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Start server
-  await app.listen(process.env.PORT ?? 3001);
+  const port = process.env.PORT ?? 3001;
+  console.log(`Server running on port ${port}`);
+  await app.listen(port);
 }
 
 bootstrap();

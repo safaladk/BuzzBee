@@ -18,8 +18,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   const { data: event, isLoading, error } = useEvent(id);
 
   // All hooks must be called before any conditional returns
-  const capacity = 500;
-  const sold = Math.floor(capacity * 0.68);
+  const capacity = event?.capacity ?? 500;
+  const sold = event?.attendees ?? 0;
   const left = Math.max(capacity - sold, 0);
   const price = event
     ? typeof event.price === "string"
@@ -145,9 +145,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               <p className="text-gray-700 leading-relaxed">
                 {event.description ||
                   `Enjoy community, culture, and creativity at ${event.title}.`}
-                {event.organizer
-                  ? ` Organized by ${event.organizer}.`
-                  : ""}
+                {event.organizer ? ` Organized by ${event.organizer}.` : ""}
               </p>
             </div>
 
@@ -157,10 +155,13 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 Event Highlights
               </h2>
               <ul className="grid sm:grid-cols-2 gap-3">
-                {["Live Music", "Food Stalls", "Cultural Dance"].map((h, i) => (
+                {(event.highlights
+                  ? event.highlights.split(",").map((h) => h.trim())
+                  : ["Live Music", "Food Stalls", "Cultural Dance"]
+                ).map((h, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <CheckCircle2
-                      className="text-green-500 mt-0.5 flex-shrink-0"
+                      className="text-green-500 mt-0.5 shrink-0"
                       size={20}
                     />
                     <span className="text-gray-700">{h}</span>
@@ -209,7 +210,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               <TicketPurchaseCard
                 price={price}
                 currency={isFree ? "Free" : "Rs."}
-                serviceFee={isFree ? 0 : 25}
+                serviceFee={isFree ? 0 : Number(event.serviceFee || 0)}
                 onBook={() => router.push(`/events/${event.id}/booking`)}
                 paymentOptions={["eSewa", "Khalti"]}
                 stats={[

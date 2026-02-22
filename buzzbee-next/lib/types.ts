@@ -14,6 +14,9 @@ export interface Event {
   attendees?: number;
   rating?: number;
   isFree?: boolean;
+  capacity?: number;
+  serviceFee?: number;
+  highlights?: string;
 }
 
 export interface User {
@@ -44,5 +47,8 @@ export interface CreateEventPayload {
   category: string;
   price: number;
   image?: string;
+  capacity?: number;
+  serviceFee?: number;
+  highlights?: string;
   isPublished?: boolean;
 }
