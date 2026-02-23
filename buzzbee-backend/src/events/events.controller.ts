@@ -37,4 +37,10 @@ export class EventsController {
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.service.findOne(id);
   }
+
+  @Post('sync-revenue')
+  @ApiOperation({ summary: 'Sync revenue for all events' })
+  syncRevenue() {
+    return this.service.syncRevenue();
+  }
 }

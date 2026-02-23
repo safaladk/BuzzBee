@@ -48,7 +48,7 @@ export default function OrganizerDashboardPage() {
         isPublished: !!event.isPublished,
         status: event.isPublished ? "published" : "draft",
         attendees: event.attendees || 0,
-        revenue: event.revenue || 0,
+        revenue: Number(event.revenue) || 0,
       }));
       setEvents(formattedEvents);
       setError(null);

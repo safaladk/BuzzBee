@@ -35,8 +35,9 @@ export class BookingsService {
 
     const savedBooking = await this.bookingRepo.save(booking);
 
-    // Update attendees in Event
+    // Update attendees and revenue in Event
     event.attendees += dto.quantity;
+    event.revenue = Number(event.revenue) + Number(event.price) * dto.quantity;
     await this.eventRepo.save(event);
 
     return savedBooking;

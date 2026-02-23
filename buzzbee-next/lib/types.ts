@@ -16,6 +16,7 @@ export interface Event {
   isFree?: boolean;
   capacity?: number;
   serviceFee?: number;
+  revenue?: number;
   highlights?: string;
 }
 

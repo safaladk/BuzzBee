@@ -47,6 +47,9 @@ export class Event {
   @Column({ type: 'int', default: 0 })
   attendees: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  revenue: number;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
