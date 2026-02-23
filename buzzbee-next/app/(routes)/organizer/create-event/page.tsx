@@ -272,7 +272,7 @@ export default function CreateEventPage() {
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="e.g., Summer Music Festival 2025"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 required
               />
             </div>
@@ -288,7 +288,7 @@ export default function CreateEventPage() {
                 onChange={handleChange}
                 placeholder="Describe your event in detail..."
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 required
               />
             </div>
@@ -305,7 +305,7 @@ export default function CreateEventPage() {
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
                   required
                 />
               </div>
@@ -320,7 +320,7 @@ export default function CreateEventPage() {
                   name="time"
                   value={formData.time}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
                   required
                 />
               </div>
@@ -335,7 +335,7 @@ export default function CreateEventPage() {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
                   required
                 >
                   <option value="Music">Music</option>
@@ -359,7 +359,7 @@ export default function CreateEventPage() {
                   value={formData.price}
                   onChange={handleChange}
                   placeholder="0 for free event"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 />
               </div>
               {/* Capacity */}
@@ -374,7 +374,7 @@ export default function CreateEventPage() {
                   value={formData.capacity}
                   onChange={handleChange}
                   placeholder="e.g., 500"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 />
               </div>
 
@@ -390,7 +390,7 @@ export default function CreateEventPage() {
                   value={formData.serviceFee}
                   onChange={handleChange}
                   placeholder="e.g., 25"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 />
               </div>
 
@@ -405,7 +405,7 @@ export default function CreateEventPage() {
                   value={formData.highlights}
                   onChange={handleChange}
                   placeholder="Live Music, Food Stalls, Cultural Dance"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 />
               </div>
             </div>
@@ -423,7 +423,7 @@ export default function CreateEventPage() {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="e.g., Thamel, Kathmandu"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                   required
                 />
               </div>
@@ -437,7 +437,7 @@ export default function CreateEventPage() {
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
                   required
                 >
                   <option value="">Select a district</option>
@@ -445,7 +445,7 @@ export default function CreateEventPage() {
                   <option value="Lalitpur">Lalitpur</option>
                   <option value="Bhaktapur">Bhaktapur</option>
                   <option value="Pokhara">Pokhara</option>
-                  <option value="Kaski">Kaski</option>
+                  <option value="Biratnagar">Biratnagar</option>
                 </select>
               </div>
             </div>
@@ -467,7 +467,7 @@ export default function CreateEventPage() {
                   }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                     imageMode === "url"
-                      ? "bg-indigo-600 text-white"
+                      ? "bg-amber-600 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
@@ -497,7 +497,7 @@ export default function CreateEventPage() {
                   value={formData.image}
                   onChange={handleChange}
                   placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 />
               )}
 

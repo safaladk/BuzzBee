@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Search, MapPin } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { Search, MapPin } from "lucide-react";
+import { Button } from "../ui/Button";
 
 export const Hero = () => {
   return (
@@ -21,8 +21,8 @@ export const Hero = () => {
           </h1>
 
           <p className="text-lg sm:text-xl text-white/85 mb-12 leading-relaxed">
-            From local community gatherings to major festivals — find, book, and experience the best
-            events in Nepal
+            From local community gatherings to major festivals — find, book, and
+            experience the best events in Nepal
           </p>
 
           {/* search container */}
@@ -32,7 +32,7 @@ export const Hero = () => {
               <input
                 type="text"
                 placeholder="Search events, concerts, workshops..."
-                className="flex-1 bg-transparent outline-none text-gray-800 placeholder-gray-400"
+                className="flex-1 bg-transparent outline-none text-black placeholder-gray-400"
               />
             </div>
 
@@ -41,7 +41,7 @@ export const Hero = () => {
               <input
                 type="text"
                 placeholder="Kathmandu, Pokhara..."
-                className="flex-1 bg-transparent outline-none text-gray-800 placeholder-gray-400"
+                className="flex-1 bg-transparent outline-none text-black placeholder-gray-400"
               />
             </div>
 

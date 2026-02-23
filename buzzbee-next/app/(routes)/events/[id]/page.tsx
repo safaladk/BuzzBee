@@ -5,7 +5,6 @@ import { notFound, useRouter } from "next/navigation";
 import { use, useMemo } from "react";
 import { Calendar, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useEvent } from "@/hooks/queries/useEvents";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TicketPurchaseCard } from "@/components/ui/TicketPurchaseCard";
 
 interface EventDetailPageProps {
@@ -18,9 +17,6 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   const { data: event, isLoading, error } = useEvent(id);
 
   // All hooks must be called before any conditional returns
-  const capacity = event?.capacity ?? 500;
-  const sold = event?.attendees ?? 0;
-  const left = Math.max(capacity - sold, 0);
   const price = event
     ? typeof event.price === "string"
       ? parseFloat(event.price)
@@ -116,23 +112,6 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           </span>
         </div>
 
-        {/* Tickets Progress Bar */}
-        <div className="bg-white rounded-2xl shadow-md p-6 mb-8 max-w-2xl">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">
-            Ticket Availability
-          </h3>
-          <ProgressBar value={sold} total={capacity} />
-          <div className="mt-3 flex items-center justify-between text-sm">
-            <p className="text-gray-600">
-              <span className="font-bold text-brand-coral text-xl">{left}</span>
-              <span className="text-gray-500"> tickets remaining</span>
-            </p>
-            <p className="text-gray-500">
-              {sold} / {capacity} sold
-            </p>
-          </div>
-        </div>
-
         {/* Content + Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}
@@ -212,6 +191,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 currency={isFree ? "Free" : "Rs."}
                 serviceFee={isFree ? 0 : Number(event.serviceFee || 0)}
                 onBook={() => router.push(`/events/${event.id}/booking`)}
+                showQuantitySelector={false}
                 paymentOptions={["eSewa", "Khalti"]}
                 stats={[
                   `${event.attendees || 0} people already registered`,

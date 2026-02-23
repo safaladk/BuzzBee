@@ -5,7 +5,14 @@ import Link from "next/link";
 import { useEvent } from "@/hooks/queries/useEvents";
 import { useCreateBooking } from "@/hooks/queries/useBookings";
 import { TicketPurchaseCard } from "@/components/ui/TicketPurchaseCard";
-import { CheckCircle2, AlertCircle, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  ShieldCheck,
+  MapPin,
+  Calendar,
+} from "lucide-react";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -35,6 +42,10 @@ export default function EventBookingPage({ params }: Props) {
     );
   }
 
+  const capacity = event.capacity ?? 500;
+  const sold = event.attendees ?? 0;
+  const left = Math.max(capacity - sold, 0);
+
   function handleBook(qty: number) {
     const price = Number(event?.price || 0);
     const serviceFee = Number(event?.serviceFee || 0);
@@ -58,27 +69,32 @@ export default function EventBookingPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
           <Link
             href={`/events/${event.id}`}
-            className="text-brand-coral hover:underline text-sm mb-2 inline-block font-semibold"
+            className="text-brand-coral hover:underline text-sm mb-4 inline-block font-semibold"
           >
-            ← Back to Event
+            ← Back to Event Details
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 leading-tight">
-            Book: {event.title}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {event.location} • {new Date(event.date).toLocaleDateString()}
-          </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+                Complete Your Booking
+              </h1>
+              <p className="text-gray-600 mt-2 text-lg">
+                For:{" "}
+                <span className="font-bold text-gray-900">{event.title}</span>
+              </p>
+            </div>
+          </div>
         </div>
 
         {bookingError && (
           <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3 text-red-700 shadow-sm">
             <AlertCircle size={20} className="shrink-0" />
             <p className="font-medium">
-              {(bookingError as any)?.message ||
+              {(bookingError as { message?: string })?.message ||
                 "There was an issue processing your booking. Please try again."}
             </p>
           </div>
@@ -86,35 +102,48 @@ export default function EventBookingPage({ params }: Props) {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-2xl bg-white p-6 shadow-md border border-gray-100 transition-all hover:shadow-lg">
-              {event.image && (
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-80 object-cover rounded-xl mb-6 shadow-sm"
-                />
-              )}
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Event Details
-              </h2>
-              <div className="prose prose-sm text-gray-700 max-w-none">
-                <p>
-                  {event.description ||
-                    `Join us for this exciting ${event.category} event at ${event.location}. Discover more and meet fellow attendees!`}
-                </p>
+            {/* Simplified Summary Card */}
+            <div className="rounded-2xl bg-white p-6 shadow-md border border-gray-100">
+              <div className="flex gap-4 items-start mb-6">
+                {event.image && (
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-24 h-24 object-cover rounded-xl shadow-sm border border-gray-100"
+                  />
+                )}
+                <div className="flex-1">
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <Calendar size={16} className="text-brand-coral" />
+                      {new Date(event.date).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <MapPin size={16} className="text-brand-coral" />
+                      {event.location}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-sm text-gray-500 line-clamp-2">
+                    {event.description ||
+                      `Join us for this exciting ${event.category} event.`}
+                  </div>
+                </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-gray-100 flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-400 uppercase tracking-wider font-bold">
-                    Organized by
-                  </span>
-                  <span className="text-gray-900 font-bold text-lg">
-                    {event.organizer || "BuzzBee Partner"}
+
+              <div className="pt-6 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-3 text-sm">
+                  <h3 className="font-bold text-gray-900">
+                    Live Ticket Availability
+                  </h3>
+                  <span className="text-brand-coral font-bold">
+                    {left} remaining
                   </span>
                 </div>
-                <div className="bg-brand-peach/20 text-brand-navy px-4 py-1.5 rounded-full text-sm font-bold border border-brand-peach/30">
-                  {event.category}
-                </div>
+                <ProgressBar value={sold} total={capacity} />
               </div>
             </div>
 
