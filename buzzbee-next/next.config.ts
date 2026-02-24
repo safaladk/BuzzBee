@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  server: {
-    port: 3001,
-  },
+  /* config options here */
 };
 
 export default nextConfig;

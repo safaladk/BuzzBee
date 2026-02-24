@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from './booking.entity';
@@ -21,7 +25,10 @@ export class BookingsService {
       throw new NotFoundException('Event not found');
     }
 
-    if (event.capacity !== null && (event.attendees + dto.quantity) > event.capacity) {
+    if (
+      event.capacity !== null &&
+      event.attendees + dto.quantity > event.capacity
+    ) {
       throw new BadRequestException('Not enough tickets available');
     }
 

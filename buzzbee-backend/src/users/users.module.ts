@@ -16,7 +16,8 @@ import { JwtStrategy } from '../auth/jwt.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'super-secret-dev-key',
+        secret:
+          configService.get<string>('JWT_SECRET') || 'super-secret-dev-key',
         signOptions: { expiresIn: '7d' },
       }),
     }),
@@ -25,4 +26,4 @@ import { JwtStrategy } from '../auth/jwt.strategy';
   providers: [UsersService, JwtStrategy],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

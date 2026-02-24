@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import {
   Calendar,
   MapPin,
@@ -16,7 +16,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { eventService } from "@/lib/services/events";
 import { CreateEventPayload } from "@/lib/types";
 
-export default function CreateEventPage() {
+function CreateEventContent() {
   const {
     mutate: createEvent,
     isPending: isCreating,
@@ -580,5 +580,19 @@ export default function CreateEventPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CreateEventPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <CreateEventContent />
+    </Suspense>
   );
 }
