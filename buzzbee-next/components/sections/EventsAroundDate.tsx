@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Calendar } from "lucide-react";
-import { EventCard } from "@/components/ui/EventCard";
-import { useEvents } from "@/hooks/queries/useEvents";
+import { EventCard } from "@/features/events/components/EventCard";
+import { useEvents } from "@/features/events/queries";
 import type { Event } from "@/lib/types";
 
 function daysBetween(a: Date, b: Date) {

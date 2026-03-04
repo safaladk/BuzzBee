@@ -7,7 +7,7 @@ export const Hero = () => {
   return (
     <div className="relative overflow-hidden bg-black text-white">
       {/* dark overlay */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-linear-to-tl from-white to-brand-peach/60" />
 
       {/* decorative layer removed */}
 

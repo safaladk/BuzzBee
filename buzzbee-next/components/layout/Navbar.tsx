@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Bell, LogIn, Menu, Plus, User, X } from "lucide-react";
 import type { User as UserType } from "@/lib/types";
 import { Button } from "../ui/Button";
-import { useAuth } from "../providers/AuthContext";
+import { useAuth } from "@/app/providers/auth-provider";
 
 interface NavbarProps {
   user: UserType | null;

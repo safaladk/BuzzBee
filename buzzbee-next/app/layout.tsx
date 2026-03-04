@@ -2,9 +2,9 @@
 
 import type { ReactNode } from "react";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/sections/Footer";
-import { AuthProvider } from "@/components/providers/AuthContext";
-import QueryProvider from "@/components/providers/QueryProvider";
+import { Footer } from "@/components/layout/Footer";
+import { AuthProvider } from "@/app/providers/auth-provider";
+import QueryProvider from "@/app/providers/react-query-provider";
 import "./globals.css";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
