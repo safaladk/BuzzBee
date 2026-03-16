@@ -1,4 +1,4 @@
-import { IsString, IsDateString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsDateString, IsNumber, IsOptional, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateEventDto {
@@ -24,6 +24,7 @@ export class CreateEventDto {
   district: string;
 
   @IsNumber()
+  @Min(0)
   @Type(() => Number)
   price: number;
 
@@ -33,11 +34,13 @@ export class CreateEventDto {
 
   @IsNumber()
   @IsOptional()
+  @Min(0)
   @Type(() => Number)
   capacity?: number;
 
   @IsNumber()
   @IsOptional()
+  @Min(0)
   @Type(() => Number)
   serviceFee?: number;
 
@@ -47,4 +50,10 @@ export class CreateEventDto {
 
   @IsOptional()
   isPublished?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  @Type(() => Number)
+  maxTicketsPerUser?: number;
 }

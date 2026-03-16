@@ -17,6 +17,7 @@ export interface Event {
   capacity?: number;
   serviceFee?: number;
   revenue?: number;
+  maxTicketsPerUser?: number;
   highlights?: string;
 }
 
@@ -50,6 +51,7 @@ export interface CreateEventPayload {
   image?: string;
   capacity?: number;
   serviceFee?: number;
+  maxTicketsPerUser?: number;
   highlights?: string;
   isPublished?: boolean;
 }

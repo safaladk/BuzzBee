@@ -10,6 +10,7 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -51,5 +52,20 @@ export class UsersService {
 
   async findById(id: number) {
     return this.repo.findOne({ where: { id } });
+  }
+
+  async updateProfile(id: number, dto: UpdateProfileDto) {
+    const user = await this.repo.findOne({ where: { id } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    if (dto.fullName) {
+      user.fullName = dto.fullName;
+    }
+
+    await this.repo.save(user);
+
+    // omitting password from returning
+    const { password, ...result } = user;
+    return result;
   }
 }

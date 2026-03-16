@@ -4,14 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, LogIn, Menu, Plus, User, X } from "lucide-react";
-import type { User as UserType } from "@/lib/types";
 import { Button } from "../ui/Button";
 import { useAuth } from "@/app/providers/auth-provider";
 
-interface NavbarProps {
-  user: UserType | null;
-  onAuthClick: () => void;
-}
+
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -111,9 +107,33 @@ export const Navbar = () => {
                         {user.role}
                       </p>
                     </div>
+                    <Link
+                      href="/favorites"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      My Favorites
+                    </Link>
+                    <Link
+                      href="/profile"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/ticketing"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      My Tickets
+                    </Link>
                     <button
                       type="button"
-                      onClick={logout}
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        logout();
+                      }}
                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
                       Logout
@@ -183,11 +203,35 @@ export const Navbar = () => {
                     {user.role}
                   </p>
                 </div>
+                <Link
+                  href="/favorites"
+                  className="flex w-full items-center justify-start text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  My Favorites
+                </Link>
+                <Link
+                  href="/profile"
+                  className="flex w-full items-center justify-start text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  My Profile
+                </Link>
+                <Link
+                  href="/ticketing"
+                  className="flex w-full items-center justify-start text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  My Tickets
+                </Link>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="w-full text-red-500 justify-start"
-                  onClick={logout}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout();
+                  }}
                   icon={null}
                 >
                   Logout

@@ -43,6 +43,7 @@ function CreateEventContent() {
     image: "",
     capacity: 0,
     serviceFee: 0,
+    maxTicketsPerUser: 0,
     highlights: "",
   });
 
@@ -61,7 +62,7 @@ function CreateEventContent() {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        name === "price" || name === "capacity" || name === "serviceFee"
+        name === "price" || name === "capacity" || name === "serviceFee" || name === "maxTicketsPerUser"
           ? value === ""
             ? 0
             : parseFloat(value)
@@ -134,6 +135,7 @@ function CreateEventContent() {
           image: data.image || "",
           capacity: Number(data.capacity) || 0,
           serviceFee: Number(data.serviceFee) || 0,
+          maxTicketsPerUser: Number(data.maxTicketsPerUser) || 0,
           highlights: data.highlights || "",
         }));
 
@@ -179,8 +181,20 @@ function CreateEventContent() {
       setLocalError("District is required");
       return false;
     }
-    if ((Number(formData.capacity) ?? 0) < 0) {
-      setLocalError("Capacity must be 0 or greater");
+    if ((Number(formData.price) ?? 0) < 0) {
+      setLocalError("Price must be 0 or greater");
+      return false;
+    }
+    if ((Number(formData.capacity) ?? 0) <= 0) {
+      setLocalError("Total Tickets must be at least 1");
+      return false;
+    }
+    if ((Number(formData.serviceFee) ?? 0) < 0) {
+      setLocalError("Service Fee must be 0 or greater");
+      return false;
+    }
+    if ((Number(formData.maxTicketsPerUser) ?? 0) < 0) {
+      setLocalError("Max tickets per user must be 0 or greater");
       return false;
     }
     return true;
@@ -229,6 +243,7 @@ function CreateEventContent() {
       price: Number(formData.price) || 0,
       capacity: Number(formData.capacity) || 0,
       serviceFee: Number(formData.serviceFee) || 0,
+      maxTicketsPerUser: Number(formData.maxTicketsPerUser) || 0,
       highlights: formData.highlights ?? "",
     } as any;
 
@@ -356,6 +371,8 @@ function CreateEventContent() {
                 <input
                   type="number"
                   name="price"
+                  min="0"
+                  step="0.01"
                   value={formData.price}
                   onChange={handleChange}
                   placeholder="0 for free event"
@@ -371,6 +388,7 @@ function CreateEventContent() {
                 <input
                   type="number"
                   name="capacity"
+                  min="1"
                   value={formData.capacity}
                   onChange={handleChange}
                   placeholder="e.g., 500"
@@ -387,9 +405,28 @@ function CreateEventContent() {
                 <input
                   type="number"
                   name="serviceFee"
+                  min="0"
+                  step="0.01"
                   value={formData.serviceFee}
                   onChange={handleChange}
                   placeholder="e.g., 25"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
+                />
+              </div>
+
+              {/* Max Tickets Per User */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Tag size={18} />
+                  Max Tickets Per User
+                </label>
+                <input
+                  type="number"
+                  name="maxTicketsPerUser"
+                  min="0"
+                  value={formData.maxTicketsPerUser}
+                  onChange={handleChange}
+                  placeholder="0 for unlimited"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
                 />
               </div>

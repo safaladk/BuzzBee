@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { Heart, Star, MapPin, Calendar, Users, Ticket } from "lucide-react";
 import type { Event } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/providers/auth-provider";
+import { useFavorites, useAddFavorite, useRemoveFavorite } from "@/features/favorites/queries";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 interface EventCardProps {
   event: Event;
@@ -11,7 +14,32 @@ interface EventCardProps {
 }
 
 export const EventCard = ({ event, onBookmark }: EventCardProps) => {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const capacity = event.capacity ?? 500;
+  const sold = event.attendees ?? 0;
+  const left = Math.max(capacity - sold, 0);
+
+  const router = useRouter();
+  const { user } = useAuth();
+  const { data: favorites } = useFavorites();
+  const { mutate: addFavorite } = useAddFavorite();
+  const { mutate: removeFavorite } = useRemoveFavorite();
+
+  const isBookmarked = favorites?.some((fav: { event: { id: string | number } }) => String(fav.event.id) === String(event.id)) ?? false;
+
+  const handleBookmark = () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    
+    onBookmark?.();
+    
+    if (isBookmarked) {
+      removeFavorite(event.id);
+    } else {
+      addFavorite(event.id);
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
@@ -34,10 +62,7 @@ export const EventCard = ({ event, onBookmark }: EventCardProps) => {
           )}
         </div>
         <button
-          onClick={() => {
-            setIsBookmarked(!isBookmarked);
-            onBookmark?.();
-          }}
+          onClick={handleBookmark}
           className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
         >
           <Heart
@@ -82,6 +107,14 @@ export const EventCard = ({ event, onBookmark }: EventCardProps) => {
                 {event.rating}
               </span>
             </div>
+          </div>
+          
+          <div className="pt-2 border-t border-gray-100 mb-4">
+            <div className="flex items-center justify-between mb-1 text-xs">
+              <span className="font-bold text-gray-700">Tickets</span>
+              <span className="text-brand-coral font-bold">{left} left</span>
+            </div>
+            <ProgressBar value={sold} total={capacity} />
           </div>
         </div>
 

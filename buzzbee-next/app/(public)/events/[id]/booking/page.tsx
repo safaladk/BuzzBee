@@ -172,6 +172,7 @@ export default function EventBookingPage({ params }: Props) {
                   "Instant confirmation",
                   "Buyer Protection",
                 ]}
+                maxTicketsPerUser={event.maxTicketsPerUser}
                 onBook={handleBook}
               />
 

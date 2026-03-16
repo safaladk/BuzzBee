@@ -32,6 +32,23 @@ export class BookingsService {
       throw new BadRequestException('Not enough tickets available');
     }
 
+    const maxTickets = event.maxTicketsPerUser;
+    if (maxTickets !== null && maxTickets > 0) {
+      const existingBookings = await this.bookingRepo.find({
+        where: { user: { id: user.id }, event: { id: event.id } },
+      });
+      const purchasedCount = existingBookings.reduce(
+        (acc, booking) => acc + booking.quantity,
+        0,
+      );
+
+      if (purchasedCount + dto.quantity > maxTickets) {
+        throw new BadRequestException(
+          `You can only purchase up to ${maxTickets} tickets for this event. You have already purchased ${purchasedCount}.`,
+        );
+      }
+    }
+
     const booking = this.bookingRepo.create({
       user,
       event,

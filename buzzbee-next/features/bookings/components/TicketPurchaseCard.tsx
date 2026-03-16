@@ -12,6 +12,7 @@ interface Props {
   showQuantitySelector?: boolean;
   paymentOptions?: string[];
   stats?: string[];
+  maxTicketsPerUser?: number;
 }
 
 export function TicketPurchaseCard({
@@ -22,8 +23,10 @@ export function TicketPurchaseCard({
   showQuantitySelector = true,
   paymentOptions = [],
   stats = [],
+  maxTicketsPerUser,
 }: Props) {
   const [qty, setQty] = useState(1);
+  const [limitMessage, setLimitMessage] = useState<string | null>(null);
   const subtotal = useMemo(() => price * qty, [price, qty]);
   const total = useMemo(() => subtotal + serviceFee, [subtotal, serviceFee]);
 
@@ -45,7 +48,10 @@ export function TicketPurchaseCard({
           <div className="inline-flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2">
             <button
               className="h-8 w-8 rounded-md bg-gray-100 text-gray-900 font-bold"
-              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              onClick={() => {
+                setLimitMessage(null);
+                setQty((q) => Math.max(1, q - 1));
+              }}
             >
               -
             </button>
@@ -54,11 +60,23 @@ export function TicketPurchaseCard({
             </span>
             <button
               className="h-8 w-8 rounded-md bg-gray-100 text-gray-900 font-bold"
-              onClick={() => setQty((q) => q + 1)}
+              onClick={() => {
+                if (maxTicketsPerUser && maxTicketsPerUser > 0 && qty >= maxTicketsPerUser) {
+                  setLimitMessage(`The max amount of tickets you can buy is ${maxTicketsPerUser}`);
+                } else {
+                  setQty((q) => q + 1);
+                  setLimitMessage(null);
+                }
+              }}
             >
               +
             </button>
           </div>
+          {limitMessage && (
+            <p className="text-sm text-red-600 mt-2 font-medium bg-red-50 p-2 rounded-md border border-red-200">
+              {limitMessage}
+            </p>
+          )}
         </div>
       )}
 

@@ -50,6 +50,9 @@ export class Event {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   revenue: number;
 
+  @Column({ type: 'int', nullable: true, default: null })
+  maxTicketsPerUser: number;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 

@@ -6,6 +6,7 @@ import { use, useMemo } from "react";
 import { Calendar, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useEvent } from "@/features/events/queries";
 import { TicketPurchaseCard } from "@/features/bookings/components/TicketPurchaseCard";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 interface EventDetailPageProps {
   params: Promise<{ id: string }>;
@@ -23,6 +24,10 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       : (event.price ?? 0)
     : 0;
   const isFree = price === 0;
+
+  const capacity = event?.capacity ?? 500;
+  const sold = event?.attendees ?? 0;
+  const left = Math.max(capacity - sold, 0);
 
   const dateStr = useMemo(() => {
     if (!event) return "";
@@ -185,7 +190,22 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
           {/* Sidebar purchase card */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8">
+            <div className="sticky top-8 space-y-4">
+              <div className="rounded-2xl bg-white p-6 shadow-md border border-gray-100">
+                <div className="flex items-center justify-between mb-3 text-sm">
+                  <h3 className="font-bold text-gray-900">
+                    Ticket Availability
+                  </h3>
+                  <span className="text-brand-coral font-bold">
+                    {left} left
+                  </span>
+                </div>
+                <ProgressBar value={sold} total={capacity} />
+                <p className="text-[10px] text-gray-400 mt-2">
+                  Real-time ticket updates
+                </p>
+              </div>
+
               <TicketPurchaseCard
                 price={price}
                 currency={isFree ? "Free" : "Rs."}
