@@ -17,16 +17,46 @@ import {
   Bell
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useStats } from "@/features/stats/queries";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const { data: platformStats } = useStats();
 
-  // Mock data for the design
+  // Dynamic stats for the design
   const stats = [
-    { label: "Total Users", value: "2,543", icon: <Users size={20} />, trend: "+12%", color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Active Events", value: "142", icon: <Calendar size={20} />, trend: "+5%", color: "text-brand-coral", bg: "bg-brand-peach/20" },
-    { label: "Monthly Revenue", value: "Rs. 2.4M", icon: <DollarSign size={20} />, trend: "+18%", color: "text-green-600", bg: "bg-green-50" },
-    { label: "Verification Requests", value: "12", icon: <ShieldCheck size={20} />, trend: "-2", color: "text-amber-600", bg: "bg-amber-50" },
+    { 
+      label: "Total Users", 
+      value: platformStats ? platformStats.usersCount.toLocaleString() : "...", 
+      icon: <Users size={20} />, 
+      trend: "+12%", 
+      color: "text-blue-600", 
+      bg: "bg-blue-50" 
+    },
+    { 
+      label: "Active Events", 
+      value: platformStats ? platformStats.eventsCount.toString() : "...", 
+      icon: <Calendar size={20} />, 
+      trend: "+5%", 
+      color: "text-brand-coral", 
+      bg: "bg-brand-peach/20" 
+    },
+    { 
+      label: "Total Revenue", 
+      value: platformStats ? `Rs. ${(platformStats.totalRevenue / 1000000).toFixed(1)}M` : "...", 
+      icon: <DollarSign size={20} />, 
+      trend: "+18%", 
+      color: "text-green-600", 
+      bg: "bg-green-50" 
+    },
+    { 
+      label: "Organizers", 
+      value: platformStats ? platformStats.organizersCount.toString() : "...", 
+      icon: <ShieldCheck size={20} />, 
+      trend: "New", 
+      color: "text-amber-600", 
+      bg: "bg-amber-50" 
+    },
   ];
 
   const recentEvents = [

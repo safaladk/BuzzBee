@@ -55,3 +55,11 @@ export interface CreateEventPayload {
   highlights?: string;
   isPublished?: boolean;
 }
+
+export interface PlatformStats {
+  eventsCount: number;
+  usersCount: number;
+  organizersCount: number;
+  citiesCount: number;
+  totalRevenue: number;
+}
