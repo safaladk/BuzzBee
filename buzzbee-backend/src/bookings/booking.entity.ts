@@ -26,7 +26,10 @@ export class Booking {
   totalPrice: number;
 
   @Column({ default: 'confirmed' })
-  status: string; // 'pending' | 'confirmed' | 'cancelled'
+  status: string; // 'pending' | 'confirmed' | 'refund_pending' | 'refunded' | 'refund_rejected'
+
+  @Column({ type: 'text', nullable: true })
+  refundReason: string;
 
   @CreateDateColumn()
   createdAt: Date;

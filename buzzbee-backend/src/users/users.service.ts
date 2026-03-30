@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -61,11 +62,25 @@ export class UsersService {
     if (dto.fullName) {
       user.fullName = dto.fullName;
     }
+    if (dto.interestedCategories !== undefined) {
+      user.interestedCategories = dto.interestedCategories;
+    }
+    if (dto.interestedLocations !== undefined) {
+      user.interestedLocations = dto.interestedLocations;
+    }
 
     await this.repo.save(user);
 
     // omitting password from returning
     const { password, ...result } = user;
     return result;
+  }
+
+  async submitVerification(id: number, documents: string[]) {
+    const user = await this.repo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+
+    user.verificationDocs = documents;
+    return this.repo.save(user);
   }
 }

@@ -50,7 +50,7 @@ export const EventCard = ({ event, onBookmark }: EventCardProps) => {
           className="w-full h-full object-cover"
         />
         <div className="absolute top-3 left-3 flex gap-2">
-          {event.verified && (
+          {event.status === 'APPROVED' && (
             <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
               <Star size={12} fill="white" /> Verified
             </span>

@@ -1,16 +1,28 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Edit2, Trash2, Eye, Plus, BarChart3 } from "lucide-react";
+import {
+  Edit2,
+  Trash2,
+  Eye,
+  Plus,
+  BarChart3,
+  AlertTriangle,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import Cookies from "js-cookie";
 import { Event } from "@/lib/types";
+import { useAuth } from "@/app/providers/auth-provider";
 
-interface OrganizerEvent extends Event {
-  status: "published" | "draft" | "ended";
+interface OrganizerEvent extends Omit<Event, "status"> {
+  displayStatus: "published" | "draft" | "ended";
+  status: Event["status"];
 }
 
 export default function OrganizerDashboardPage() {
+  const { user } = useAuth();
   const [events, setEvents] = useState<OrganizerEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,22 +33,22 @@ export default function OrganizerDashboardPage() {
     try {
       setLoading(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/events?_=${Date.now()}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/events/my-events?_=${Date.now()}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
           cache: "no-store",
         },
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch events");
+        throw new Error("You currently have not organized any events.");
       }
 
       const data = await response.json();
       console.debug("Organizer dashboard fetched events:", data);
-      // Map events to organizer format with status and coerce numeric fields
+      // Map events to organizer
       const formattedEvents = (
         Array.isArray(data) ? data : data.data || []
       ).map((event: any) => ({
@@ -46,7 +58,7 @@ export default function OrganizerDashboardPage() {
         date: event.date,
         price: Number(event.price) || 0,
         isPublished: !!event.isPublished,
-        status: event.isPublished ? "published" : "draft",
+        displayStatus: event.isPublished ? "published" : "draft",
         attendees: event.attendees || 0,
         revenue: Number(event.revenue) || 0,
       }));
@@ -83,7 +95,7 @@ export default function OrganizerDashboardPage() {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         },
       );
@@ -112,22 +124,64 @@ export default function OrganizerDashboardPage() {
           </div>
           <Link href="/organizer/create-event">
             <Button
-              className="cursor-pointer"
-              variant="primary"
-              size="lg"
               icon={<Plus size={20} />}
-              onClick={() => {}}
+              variant="outline"
+              className="w-full border-amber-500 text-white bg-amber-600 cursor-pointer"
             >
               Create Event
             </Button>
           </Link>
         </div>
 
+        {/* Verification Alert */}
+        {!user?.isVerified && (
+          <div className="mb-8 rounded-2xl bg-amber-50 border border-amber-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-4 text-amber-800">
+              <div className="bg-amber-100 p-3 rounded-xl shrink-0">
+                <AlertTriangle size={24} className="text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Verify Your Account</h3>
+                <p className="text-sm opacity-90">
+                  Unlock all features of the platform and build trust with your
+                  audience.
+                </p>
+              </div>
+            </div>
+            <Link href="/organizer/verify" className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                className="w-full bg-white border-amber-500 text-amber-600 hover:bg-amber-600"
+              >
+                Start Verification
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {user?.isVerified && (
+          <div className="mb-8 rounded-2xl bg-green-50 border border-green-200 p-4 flex items-center gap-3 text-green-800">
+            <ShieldCheck size={20} className="text-green-600" />
+            <span className="text-sm font-semibold">
+              Your organizer account is verified.
+            </span>
+          </div>
+        )}
+
         {/* Error Message */}
-        {error && (
-          <div className="mb-6 rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-            <p className="font-medium">Error</p>
-            <p>{error}</p>
+        {error && events.length === 0 && (
+          <div className="mb-6 rounded-2xl bg-red-50 border border-red-200 p-6 flex items-center gap-4 text-red-700 animate-in fade-in slide-in-from-top-4">
+            <div className="bg-red-100 p-3 rounded-xl">
+              <AlertTriangle size={24} className="text-red-600" />
+            </div>
+            <div>
+              <p className="font-bold">No events organized yet</p>
+              <p className="text-sm opacity-90">
+                {error === "Failed to fetch"
+                  ? "Connected but could not retrieve data."
+                  : error}
+              </p>
+            </div>
           </div>
         )}
 
@@ -237,7 +291,6 @@ export default function OrganizerDashboardPage() {
                     <Button
                       variant="primary"
                       icon={<Plus size={20} />}
-                      onClick={() => {}}
                     >
                       Create Your First Event
                     </Button>
@@ -303,25 +356,27 @@ export default function OrganizerDashboardPage() {
                           <td className="px-6 py-4 text-sm">
                             <span
                               className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                event.status === "published"
+                                event.displayStatus === "published"
                                   ? "bg-green-100 text-green-800"
-                                  : event.status === "draft"
+                                  : event.displayStatus === "draft"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-gray-100 text-gray-800"
                               }`}
                             >
-                              {event.status.charAt(0).toUpperCase() +
-                                event.status.slice(1)}
+                              {event.displayStatus.charAt(0).toUpperCase() +
+                                event.displayStatus.slice(1)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <div className="flex gap-2">
-                              <button
-                                className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition cursor-pointer"
-                                title="View"
-                              >
-                                <Eye size={18} />
-                              </button>
+                              <Link href={`/organizer/events/${event.id}`}>
+                                <button
+                                  className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition cursor-pointer"
+                                  title="View"
+                                >
+                                  <Eye size={18} />
+                                </button>
+                              </Link>
                               <Link
                                 href={`/organizer/create-event?id=${event.id}`}
                               >

@@ -81,4 +81,63 @@ export class BookingsService {
       relations: ['user'],
     });
   }
+
+  async requestRefund(bookingId: number, userId: number, reason: string) {
+    const booking = await this.bookingRepo.findOne({
+      where: { id: bookingId, user: { id: userId } },
+      relations: ['event'],
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.status !== 'confirmed') {
+      throw new BadRequestException('Only confirmed bookings can be refunded');
+    }
+
+    // Check if event has already passed
+    const eventTime = new Date(booking.event.date).getTime();
+    if (eventTime < Date.now()) {
+      throw new BadRequestException('Cannot request refund for past events');
+    }
+
+    booking.status = 'refund_pending';
+    booking.refundReason = reason;
+    return this.bookingRepo.save(booking);
+  }
+
+  async getPendingRefunds() {
+    return this.bookingRepo.find({
+      where: { status: 'refund_pending' },
+      relations: ['user', 'event'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async processRefund(bookingId: number, status: 'refunded' | 'refund_rejected') {
+    const booking = await this.bookingRepo.findOne({
+      where: { id: bookingId },
+      relations: ['event'],
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.status !== 'refund_pending') {
+      throw new BadRequestException('No pending refund request for this booking');
+    }
+
+    if (status === 'refunded') {
+      // Decrement attendees and revenue
+      const event = booking.event;
+      event.attendees = Math.max(0, event.attendees - booking.quantity);
+      event.revenue = Math.max(0, Number(event.revenue) - Number(booking.totalPrice));
+      await this.eventRepo.save(event);
+    }
+
+    booking.status = status;
+    return this.bookingRepo.save(booking);
+  }
 }

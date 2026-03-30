@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Calendar, Clock, Filter, Search } from "lucide-react";
 import { CategoryFilter } from "@/features/events/components/CategoryFilter";
 import { EventCard } from "@/features/events/components/EventCard";
@@ -8,10 +9,15 @@ import { categories } from "@/lib/constants";
 import { useEvents } from "@/features/events/queries";
 import Link from "next/link";
 
-export default function EventsPage() {
+function EventsContent() {
   const { data: events, isLoading, error } = useEvents();
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("q") || "";
+  
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  const now = useMemo(() => new Date().getTime(), []);
 
   const filteredEvents = events
     ? events.filter((event) => {
@@ -20,7 +26,8 @@ export default function EventsPage() {
         const matchesSearch = event.title
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        const isUpcoming = new Date(event.date).getTime() >= now;
+        return matchesCategory && matchesSearch && isUpcoming;
       })
     : [];
 
@@ -63,6 +70,26 @@ export default function EventsPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {events && events.filter((e) => e.isSponsored && new Date(e.date).getTime() >= now).length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <span className="bg-brand-coral w-2 h-6 rounded-full inline-block"></span>
+              Featured Events
+            </h2>
+            <div className="flex overflow-x-auto pb-6 gap-6 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {events
+                .filter((e) => e.isSponsored && new Date(e.date).getTime() >= now)
+                .map((event) => (
+                  <div key={event.id} className="min-w-[300px] md:min-w-[400px] snap-start">
+                    <Link href={`/events/${event.id}`}>
+                      <EventCard event={event} />
+                    </Link>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -109,5 +136,14 @@ export default function EventsPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function EventsPage() {
+  const searchParams = useSearchParams();
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <EventsContent key={searchParams.toString()} />
+    </Suspense>
   );
 }

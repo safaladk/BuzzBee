@@ -1,17 +1,110 @@
 "use client";
 
-import { useMyBookings } from "@/features/bookings/queries";
-import { Ticket, Calendar, MapPin, Loader2, Search } from "lucide-react";
+import { useMyBookings, useRequestRefund } from "@/features/bookings/queries";
+import {
+  Ticket,
+  Calendar,
+  MapPin,
+  Loader2,
+  Search,
+  RotateCcw,
+} from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { Modal } from "@/components/ui/Modal";
+import { Booking } from "@/lib/types";
+
+const REFUND_REASONS = [
+  "Schedule conflict",
+  "Event rescheduled or changed",
+  "Booked the wrong event/date",
+  "No longer interested",
+  "Medical or emergency situation",
+  "Other",
+];
 
 export default function TicketingPage() {
   const { data: bookings, isLoading, error } = useMyBookings();
+  const { mutate: requestRefund, isPending: isRequestingRefund } =
+    useRequestRefund();
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterTab, setFilterTab] = useState<"upcoming" | "past">("upcoming");
 
-  const filteredBookings = bookings?.filter((b) =>
-    b.event.title.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  // Refund Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedReason, setSelectedReason] = useState("");
+  const [customReason, setCustomReason] = useState("");
+
+  const handleRefundRequest = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsModalOpen(true);
+    setSelectedReason("");
+    setCustomReason("");
+  };
+
+
+  const now = useMemo(() => new Date().getTime(), []);
+
+  const refundCalculation = useMemo(() => {
+    if (!selectedBooking) return null;
+    
+    const eventDate = new Date(selectedBooking.event.date).getTime();
+    const hoursUntilEvent = (eventDate - now) / (1000 * 60 * 60);
+
+    const SERVICE_FEE_PER_TICKET = 50;
+    const totalServiceFee = selectedBooking.quantity * SERVICE_FEE_PER_TICKET;
+    const ticketPriceSubtotal = selectedBooking.totalPrice - totalServiceFee;
+
+    let refundPercentage = 0;
+    if (hoursUntilEvent > 48) {
+      refundPercentage = 1;
+    } else if (hoursUntilEvent >= 24) {
+      refundPercentage = 0.5;
+    } else {
+      refundPercentage = 0;
+    }
+
+    const refundAmount = ticketPriceSubtotal * refundPercentage;
+
+    return {
+      total: selectedBooking.totalPrice,
+      subtotal: ticketPriceSubtotal,
+      serviceFee: totalServiceFee,
+      percentage: refundPercentage * 100,
+      amount: refundAmount,
+    };
+  }, [selectedBooking, now]);
+
+  const confirmRefund = () => {
+    if (!selectedBooking || !selectedReason) return;
+
+    const finalReason =
+      selectedReason === "Other" ? customReason : selectedReason;
+    if (selectedReason === "Other" && !customReason.trim()) {
+      alert("Please provide a custom reason.");
+      return;
+    }
+
+    requestRefund(
+      { id: selectedBooking.id, reason: finalReason },
+      {
+        onSuccess: () => {
+          setIsModalOpen(false);
+        },
+      },
+    );
+  };
+
+
+  const filteredBookings = bookings?.filter((b) => {
+    const matchesSearch = b.event.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const eventDate = new Date(b.event.date).getTime();
+    const isPast = eventDate < now;
+    
+    if (filterTab === "upcoming") return matchesSearch && !isPast;
+    return matchesSearch && isPast;
+  });
 
   if (isLoading) {
     return (
@@ -45,22 +138,38 @@ export default function TicketingPage() {
             <h1 className="text-3xl font-bold text-gray-900 leading-tight">
               My Tickets
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 mt-1 italic font-medium">
               Manage your event bookings and access digital tickets.
             </p>
           </div>
-          <div className="relative">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Search tickets..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-coral w-full md:w-64 shadow-sm text-black"
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex bg-white p-1 rounded-xl border border-gray-100 shadow-sm">
+              <button
+                onClick={() => setFilterTab("upcoming")}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "upcoming" ? "bg-brand-coral text-white shadow-md shadow-brand-coral/20" : "text-gray-500 hover:text-brand-coral"}`}
+              >
+                Upcoming
+              </button>
+              <button
+                onClick={() => setFilterTab("past")}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "past" ? "bg-brand-coral text-white shadow-md shadow-brand-coral/20" : "text-gray-500 hover:text-brand-coral"}`}
+              >
+                History
+              </button>
+            </div>
+            <div className="relative w-full sm:w-auto">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
+              <input
+                type="text"
+                placeholder="Search tickets..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-coral w-full md:w-64 shadow-sm text-black transition-all"
+              />
+            </div>
           </div>
         </div>
 
@@ -96,17 +205,33 @@ export default function TicketingPage() {
                     alt={booking.event.title}
                     className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent sm:hidden" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent sm:hidden" />
                   <div className="absolute bottom-3 left-3 sm:hidden text-white font-bold px-2 py-0.5 rounded bg-brand-coral text-xs">
                     {booking.quantity}x Tickets
                   </div>
                 </div>
                 <div className="p-5 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-bold text-brand-coral uppercase tracking-wider">
+                    <span
+                      className={`text-xs font-bold uppercase tracking-wider ${
+                        booking.status === "confirmed"
+                          ? "text-green-600"
+                          : booking.status === "refund_pending"
+                            ? "text-amber-600"
+                            : booking.status === "refunded"
+                              ? "text-red-600"
+                              : "text-gray-600"
+                      }`}
+                    >
                       {booking.status === "confirmed"
                         ? "Confirmed"
-                        : booking.status}
+                        : booking.status === "refund_pending"
+                          ? "Refund Pending"
+                          : booking.status === "refunded"
+                            ? "Refunded"
+                            : booking.status === "refund_rejected"
+                              ? "Refund Rejected"
+                              : booking.status}
                     </span>
                     <span className="hidden sm:block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">
                       ID: #{booking.id.toString().padStart(4, "0")}
@@ -150,16 +275,28 @@ export default function TicketingPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="mt-2 pt-4 border-t border-gray-50 flex items-center justify-between">
+                  <div className="mt-2 pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
                     <Link
                       href={`/events/${booking.event.id}`}
-                      className="text-xs font-bold text-gray-400 hover:text-brand-coral transition-colors uppercase tracking-widest"
+                      className="text-xs font-bold text-gray-400 hover:text-brand-coral transition-colors uppercase tracking-widest whitespace-nowrap"
                     >
                       View Event
                     </Link>
-                    <button className="bg-brand-coral/10 text-brand-coral px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-coral hover:text-white transition-all">
-                      Download Ticket
-                    </button>
+                    <div className="flex gap-2">
+                      {booking.status === "confirmed" && filterTab === "upcoming" && (
+                        <button
+                          onClick={() => handleRefundRequest(booking)}
+                          disabled={isRequestingRefund}
+                          className="flex items-center gap-1.5 bg-amber-50 text-amber-600 px-3 py-2 rounded-lg text-xs font-bold hover:bg-amber-100 transition-all disabled:opacity-50"
+                        >
+                          <RotateCcw size={14} />
+                          {isRequestingRefund ? "Requesting..." : "Refund"}
+                        </button>
+                      )}
+                      <button className="bg-brand-coral/10 text-brand-coral px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-coral hover:text-white transition-all whitespace-nowrap">
+                        Download Ticket
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -167,6 +304,100 @@ export default function TicketingPage() {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Request Refund"
+        size="md"
+      >
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+            <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center text-xs font-black text-slate-400 uppercase tracking-widest">
+              <span>Refund Estimation</span>
+              <span className="text-brand-coral">{refundCalculation?.percentage}% Refund</span>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Ticket Price ({selectedBooking?.quantity}x)</span>
+                <span className="text-slate-900 font-bold">Rs. {refundCalculation?.subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Service Fee (Non-refundable)</span>
+                <span className="text-slate-900 font-bold">Rs. {refundCalculation?.serviceFee.toLocaleString()}</span>
+              </div>
+              <div className="h-px bg-slate-100 w-full" />
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-bold text-slate-900">Total Refund Amount</span>
+                <span className="text-lg font-black text-brand-coral">Rs. {refundCalculation?.amount.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
+              Why do you want a refund?
+            </label>
+            <div className="space-y-2">
+              {REFUND_REASONS.map((reason) => (
+                <label
+                  key={reason}
+                  className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${
+                    selectedReason === reason
+                      ? "border-brand-coral bg-brand-coral/5 text-brand-coral"
+                      : "border-gray-100 hover:border-gray-200 text-gray-600"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="refundReason"
+                    value={reason}
+                    checked={selectedReason === reason}
+                    onChange={(e) => setSelectedReason(e.target.value)}
+                    className="w-4 h-4 accent-brand-coral"
+                  />
+                  <span className="text-sm font-medium">{reason}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {selectedReason === "Other" && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
+                Please specify
+              </label>
+              <textarea
+                value={customReason}
+                onChange={(e) => setCustomReason(e.target.value)}
+                placeholder="Details of your request..."
+                rows={3}
+                className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm focus:ring-2 focus:ring-brand-coral/20 transition-all border border-gray-100"
+              />
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-4 border-t border-gray-100">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 text-sm font-bold hover:bg-gray-200 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmRefund}
+              disabled={
+                !selectedReason ||
+                (selectedReason === "Other" && !customReason.trim()) ||
+                isRequestingRefund
+              }
+              className="flex-2 py-3 rounded-xl bg-brand-coral text-white text-sm font-bold shadow-md shadow-brand-coral/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+            >
+              {isRequestingRefund ? "Submitting..." : "Confirm Refund Request"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
