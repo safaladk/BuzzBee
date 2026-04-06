@@ -25,6 +25,9 @@ export class Booking {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalPrice: number;
 
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  paymentIntentId: string | null;
+
   @Column({ default: 'confirmed' })
   status: string; // 'pending' | 'confirmed' | 'refund_pending' | 'refunded' | 'refund_rejected'
 

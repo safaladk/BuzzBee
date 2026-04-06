@@ -9,6 +9,7 @@ import { Booking } from './booking.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { User } from '../users/user.entity';
 import { Event } from '../events/event.entity';
+import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class BookingsService {
@@ -17,6 +18,7 @@ export class BookingsService {
     private bookingRepo: Repository<Booking>,
     @InjectRepository(Event)
     private eventRepo: Repository<Event>,
+    private paymentsService: PaymentsService,
   ) {}
 
   async create(user: User, dto: CreateBookingDto) {
@@ -49,11 +51,41 @@ export class BookingsService {
       }
     }
 
+    const unitPrice = Number(event.price || 0);
+    const serviceFee = Number(event.serviceFee || 0);
+    const computedTotalPrice = unitPrice * dto.quantity + serviceFee;
+
+    if (Math.abs(Number(dto.totalPrice) - computedTotalPrice) > 0.01) {
+      throw new BadRequestException('Total price mismatch');
+    }
+
+    const isPaidBooking = computedTotalPrice > 0;
+    if (isPaidBooking) {
+      if (!dto.paymentIntentId) {
+        throw new BadRequestException('Payment intent is required for paid events');
+      }
+
+      const existingByIntent = await this.bookingRepo.findOne({
+        where: { paymentIntentId: dto.paymentIntentId },
+      });
+      if (existingByIntent) {
+        throw new BadRequestException('Payment has already been used for a booking');
+      }
+
+      await this.paymentsService.verifySucceededPaymentIntent({
+        paymentIntentId: dto.paymentIntentId,
+        expectedTotalPrice: computedTotalPrice,
+        eventId: event.id,
+        userId: user.id,
+      });
+    }
+
     const booking = this.bookingRepo.create({
       user,
       event,
       quantity: dto.quantity,
-      totalPrice: dto.totalPrice,
+      totalPrice: computedTotalPrice,
+      paymentIntentId: dto.paymentIntentId ?? null,
       status: 'confirmed',
     });
 

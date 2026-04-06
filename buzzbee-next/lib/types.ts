@@ -14,6 +14,7 @@ export interface Event {
   organizer?: User;
   isPublished?: boolean;
   attendees?: number;
+  verified?: boolean;
   rating?: number;
   isFree?: boolean;
   capacity?: number;
