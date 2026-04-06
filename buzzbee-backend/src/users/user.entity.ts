@@ -38,6 +38,9 @@ export class User {
   @Column({ type: 'text', nullable: true, array: true })
   interestedLocations: string[];
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  pointsBalance: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

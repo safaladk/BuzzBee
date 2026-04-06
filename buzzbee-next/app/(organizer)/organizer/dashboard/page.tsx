@@ -9,12 +9,14 @@ import {
   BarChart3,
   AlertTriangle,
   ShieldCheck,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import Cookies from "js-cookie";
 import { Event } from "@/lib/types";
 import { useAuth } from "@/app/providers/auth-provider";
+import { BoostEventModal } from "@/features/events/components/BoostEventModal";
 
 interface OrganizerEvent extends Omit<Event, "status"> {
   displayStatus: "published" | "draft" | "ended";
@@ -28,6 +30,9 @@ export default function OrganizerDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [boostModalOpen, setBoostModalOpen] = useState(false);
+  const [selectedEventForBoost, setSelectedEventForBoost] =
+    useState<OrganizerEvent | null>(null);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -51,7 +56,7 @@ export default function OrganizerDashboardPage() {
       // Map events to organizer
       const formattedEvents = (
         Array.isArray(data) ? data : data.data || []
-      ).map((event: any) => ({
+      ).map((event: Event) => ({
         ...event,
         title: event.title,
         description: event.description,
@@ -107,6 +112,11 @@ export default function OrganizerDashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openBoostModal = (event: OrganizerEvent) => {
+    setSelectedEventForBoost(event);
+    setBoostModalOpen(true);
   };
 
   return (
@@ -288,10 +298,7 @@ export default function OrganizerDashboardPage() {
                 <div className="px-6 py-12 text-center">
                   <p className="text-gray-600 mb-4">No events yet</p>
                   <Link href="/organizer/create-event">
-                    <Button
-                      variant="primary"
-                      icon={<Plus size={20} />}
-                    >
+                    <Button variant="primary" icon={<Plus size={20} />}>
                       Create Your First Event
                     </Button>
                   </Link>
@@ -366,6 +373,12 @@ export default function OrganizerDashboardPage() {
                               {event.displayStatus.charAt(0).toUpperCase() +
                                 event.displayStatus.slice(1)}
                             </span>
+                            {event.isSponsored && (
+                              <span className="ml-2 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 shadow-md shadow-amber-500/20">
+                                <Zap size={10} fill="currentColor" />
+                                Boosted
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <div className="flex gap-2">
@@ -397,6 +410,29 @@ export default function OrganizerDashboardPage() {
                                 <Trash2 size={18} />
                               </button>
                             </div>
+                            {user?.isVerified &&
+                              event.status === "APPROVED" && (
+                                <button
+                                  onClick={() => openBoostModal(event)}
+                                  className={`mt-2 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-sm ${
+                                    event.isSponsored
+                                      ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                                      : "bg-brand-coral text-white hover:scale-105 active:scale-95 shadow-brand-coral/20"
+                                  }`}
+                                >
+                                  <Zap
+                                    size={14}
+                                    fill={
+                                      event.isSponsored
+                                        ? "currentColor"
+                                        : "white"
+                                    }
+                                  />
+                                  {event.isSponsored
+                                    ? "Extend Boost"
+                                    : "Boost Event"}
+                                </button>
+                              )}
                           </td>
                         </tr>
                       ))}
@@ -408,6 +444,20 @@ export default function OrganizerDashboardPage() {
           </>
         )}
       </div>
+
+      {selectedEventForBoost && (
+        <BoostEventModal
+          isOpen={boostModalOpen}
+          onClose={() => {
+            setBoostModalOpen(false);
+            setSelectedEventForBoost(null);
+          }}
+          event={selectedEventForBoost as unknown as Event}
+          onSuccess={() => {
+            fetchEvents();
+          }}
+        />
+      )}
     </div>
   );
 }

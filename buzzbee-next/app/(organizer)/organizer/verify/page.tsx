@@ -34,16 +34,22 @@ export default function VerificationPage() {
     setLoading(true);
     setError(null);
     try {
-      await api.post("/users/verify-organizer", {
-        docs: docs
+      await api.post("/auth/verify-organizer", {
+        documents: docs
       });
       setSuccess(true);
       await refreshUser();
       setTimeout(() => {
         router.push("/organizer/dashboard");
       }, 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to submit verification.");
+    } catch (err: unknown) {
+      let message = "Failed to submit verification.";
+      if (err && typeof err === 'object' && 'response' in err) {
+        message = (err as any).response?.data?.message || message;
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }

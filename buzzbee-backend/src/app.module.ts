@@ -8,6 +8,10 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { StatsModule } from './stats/stats.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
+<<<<<<< Updated upstream
+=======
+import { NotificationsModule } from './notifications/notifications.module';
+>>>>>>> Stashed changes
 
 @Module({
   imports: [
@@ -31,6 +35,10 @@ import { PaymentsModule } from './payments/payments.module';
     StatsModule,
     AdminModule,
     PaymentsModule,
+<<<<<<< Updated upstream
+=======
+    NotificationsModule,
+>>>>>>> Stashed changes
   ],
 })
 export class AppModule {}

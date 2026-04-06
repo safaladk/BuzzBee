@@ -107,4 +107,13 @@ export class EventsController {
   syncRevenue() {
     return this.service.syncRevenue();
   }
+
+  @Post(':id/cancel')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancel an event' })
+  cancel(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    const organizerId = req.user.role === 'admin' ? undefined : req.user.id;
+    return this.service.cancelEvent(id, organizerId);
+  }
 }

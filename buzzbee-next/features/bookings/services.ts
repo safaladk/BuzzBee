@@ -6,6 +6,10 @@ export interface BookingPayload {
   quantity: number;
   totalPrice: number;
   paymentIntentId?: string;
+<<<<<<< Updated upstream
+=======
+  pointsUsed?: number;
+>>>>>>> Stashed changes
 }
 
 export const bookingService = {

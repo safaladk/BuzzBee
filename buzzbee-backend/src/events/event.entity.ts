@@ -55,7 +55,7 @@ export class Event {
   maxTicketsPerUser: number;
 
   @Column({ default: 'PENDING' })
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REPORTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REPORTED' | 'CANCELLED';
 
   @Column({ type: 'text', nullable: true })
   rejectionNote: string;
@@ -68,6 +68,12 @@ export class Event {
 
   @ManyToOne(() => User, { eager: true })
   organizer: User;
+
+  @Column({ type: 'timestamp', nullable: true })
+  sponsoredUntil: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  sponsoredAt: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

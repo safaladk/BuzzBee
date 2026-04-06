@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useEvents } from "@/features/events/queries";
+import { useSponsoredEvents } from "@/features/events/queries";
 import { Calendar, MapPin, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
 export function SponsoredEvents() {
-  const { data: allEvents, isLoading } = useEvents();
+  const { data: sponsoredEvents = [], isLoading } = useSponsoredEvents();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+<<<<<<< Updated upstream
   const sponsoredEvents = allEvents
     ? allEvents.filter(
         (e) =>
@@ -17,6 +18,8 @@ export function SponsoredEvents() {
       )
     : [];
 
+=======
+>>>>>>> Stashed changes
   useEffect(() => {
     if (sponsoredEvents.length <= 1) return;
     const interval = setInterval(() => {

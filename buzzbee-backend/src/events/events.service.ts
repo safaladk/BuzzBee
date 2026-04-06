@@ -1,15 +1,17 @@
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository, IsNull, FindOptionsWhere } from 'typeorm';
 import { Event } from './event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { User } from '../users/user.entity';
+import { BookingsService } from '../bookings/bookings.service';
 
 @Injectable()
 export class EventsService implements OnModuleInit {
   constructor(
     @InjectRepository(Event)
     private repo: Repository<Event>,
+    private bookingsService: BookingsService,
   ) {}
 
   async onModuleInit() {
@@ -43,6 +45,30 @@ export class EventsService implements OnModuleInit {
     }
     await this.repo.remove(event);
     return { success: true };
+  }
+
+  async cancelEvent(id: number, organizerId?: number) {
+    const whereClause: FindOptionsWhere<Event> = { id };
+    if (organizerId) {
+      whereClause.organizer = { id: organizerId };
+    }
+
+    const event = await this.repo.findOne({ where: whereClause });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    if (event.status === 'CANCELLED') {
+      return event;
+    }
+
+    event.status = 'CANCELLED';
+    await this.repo.save(event);
+
+    // Automatically refund all attendees
+    await this.bookingsService.refundAllForEvent(id);
+
+    return event;
   }
 
   findAll() {
@@ -102,13 +128,24 @@ export class EventsService implements OnModuleInit {
   }
 
   getSponsoredEvents() {
+    const now = new Date();
     return this.repo.find({
-      where: {
-        isPublished: true,
-        status: 'APPROVED',
-        isSponsored: true,
-        date: MoreThanOrEqual(new Date()),
-      },
+      where: [
+        {
+          isPublished: true,
+          status: 'APPROVED',
+          isSponsored: true,
+          date: MoreThanOrEqual(now),
+          sponsoredUntil: MoreThanOrEqual(now),
+        },
+        {
+          isPublished: true,
+          status: 'APPROVED',
+          isSponsored: true,
+          date: MoreThanOrEqual(now),
+          sponsoredUntil: IsNull(),
+        },
+      ],
       order: { date: 'ASC' },
     });
   }

@@ -20,4 +20,12 @@ export class CreateBookingDto {
   @IsString()
   @IsOptional()
   paymentIntentId?: string;
+<<<<<<< Updated upstream
+=======
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  pointsUsed?: number;
+>>>>>>> Stashed changes
 }

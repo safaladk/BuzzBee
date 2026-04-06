@@ -7,6 +7,7 @@ import { useCreateBooking } from "@/features/bookings/queries";
 import { useCreatePaymentIntent } from "@/features/payments/queries";
 import { PaymentIntentSession } from "@/features/payments/services";
 import { TicketPurchaseCard } from "@/features/bookings/components/TicketPurchaseCard";
+import { useAuth } from "@/app/providers/auth-provider";
 import {
   CheckCircle2,
   AlertCircle,
@@ -22,6 +23,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+<<<<<<< Updated upstream
 
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
@@ -145,11 +147,144 @@ function CardPaymentPanel({
     </div>
   );
 }
+=======
+>>>>>>> Stashed changes
 
-type Props = { params: Promise<{ id: string }> };
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
-export default function EventBookingPage({ params }: Props) {
+type CardPaymentPanelProps = {
+  checkoutSession: PaymentIntentSession;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  onPaymentSucceeded: (paymentIntentId: string) => Promise<void>;
+};
+
+function CardPaymentPanel({
+  checkoutSession,
+  isSubmitting,
+  onCancel,
+  onPaymentSucceeded,
+}: CardPaymentPanelProps) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [cardError, setCardError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  async function handleConfirmPayment() {
+    if (!stripe || !elements) {
+      setCardError("Stripe is still loading. Please try again in a moment.");
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setCardError("Card input is unavailable. Please refresh and try again.");
+      return;
+    }
+
+    setCardError(null);
+    setIsConfirming(true);
+
+    const result = await stripe.confirmCardPayment(
+      checkoutSession.clientSecret,
+      {
+        payment_method: {
+          card: cardElement,
+        },
+      },
+    );
+
+    if (result.error) {
+      setCardError(result.error.message || "Payment failed. Please try again.");
+      setIsConfirming(false);
+      return;
+    }
+
+    const paymentIntentId = result.paymentIntent?.id;
+    if (!paymentIntentId) {
+      setCardError("Payment confirmation failed. Please try again.");
+      setIsConfirming(false);
+      return;
+    }
+
+    try {
+      await onPaymentSucceeded(paymentIntentId);
+    } catch {
+      setCardError(
+        "Payment was successful but booking confirmation failed. Please contact support.",
+      );
+    } finally {
+      setIsConfirming(false);
+    }
+  }
+
+  const isBusy = isConfirming || isSubmitting;
+
+  return (
+    <div className="rounded-2xl bg-white p-5 shadow-md border border-gray-100 space-y-4">
+      <h3 className="text-base font-bold text-gray-900">Pay with Card</h3>
+      <p className="text-sm text-gray-600">
+        Amount:{" "}
+        <span className="font-semibold text-gray-900">
+          {checkoutSession.currency.toUpperCase()}{" "}
+          {checkoutSession.amount.toFixed(2)}
+        </span>
+      </p>
+
+      <div className="rounded-xl border border-gray-200 p-3 bg-gray-50">
+        <CardElement
+          options={{
+            style: {
+              base: {
+                fontSize: "16px",
+                color: "#111827",
+                "::placeholder": {
+                  color: "#9CA3AF",
+                },
+              },
+              invalid: {
+                color: "#DC2626",
+              },
+            },
+          }}
+        />
+      </div>
+
+      {cardError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          {cardError}
+        </div>
+      )}
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={handleConfirmPayment}
+          disabled={isBusy}
+          className="flex-1 bg-brand-coral text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:opacity-90 disabled:opacity-70"
+        >
+          {isBusy ? "Confirming..." : "Pay and Confirm Booking"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isBusy}
+          className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-70"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type PayloadProps = { params: Promise<{ id: string }> };
+
+export default function EventBookingPage({ params }: PayloadProps) {
   const { id } = use(params);
+  const { user } = useAuth();
   const { data: event, isLoading } = useEvent(id);
   const {
     mutateAsync: createBooking,
@@ -185,12 +320,24 @@ export default function EventBookingPage({ params }: Props) {
   const sold = event.attendees ?? 0;
   const left = Math.max(capacity - sold, 0);
 
+<<<<<<< Updated upstream
   async function handleBook(qty: number) {
+=======
+  async function handleBook({
+    qty,
+    pointsUsed,
+  }: {
+    qty: number;
+    pointsUsed: number;
+  }) {
+>>>>>>> Stashed changes
     setCheckoutError(null);
     const price = Number(event?.price || 0);
     const serviceFee = Number(event?.serviceFee || 0);
     const totalPrice = price * qty + serviceFee;
+    const remainingToPay = totalPrice - pointsUsed;
 
+<<<<<<< Updated upstream
     if (totalPrice <= 0) {
       await createBooking({
         eventId: Number(event?.id),
@@ -219,6 +366,39 @@ export default function EventBookingPage({ params }: Props) {
         (error as { message?: string })?.message ||
           "Unable to start checkout. Please try again.",
       );
+=======
+    if (remainingToPay <= 0) {
+      try {
+        await createBooking({
+          eventId: Number(event?.id),
+          quantity: qty,
+          totalPrice,
+          pointsUsed: pointsUsed,
+        });
+        setConfirmed(true);
+      } catch (err: any) {
+        setCheckoutError(err?.message || "Booking failed.");
+      }
+      return;
+    }
+
+    if (!stripePromise) {
+      setCheckoutError(
+        "Stripe configuration missing. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.",
+      );
+      return;
+    }
+
+    try {
+      const session = await createPaymentIntent({
+        eventId: Number(event?.id),
+        quantity: qty,
+        pointsUsed: pointsUsed,
+      });
+      setCheckoutSession(session);
+    } catch (err: any) {
+      setCheckoutError(err?.message || "Unable to start checkout.");
+>>>>>>> Stashed changes
     }
   }
 
@@ -230,6 +410,10 @@ export default function EventBookingPage({ params }: Props) {
       quantity: checkoutSession.quantity,
       totalPrice: checkoutSession.totalPrice,
       paymentIntentId,
+<<<<<<< Updated upstream
+=======
+      pointsUsed: checkoutSession.pointsUsed,
+>>>>>>> Stashed changes
     });
 
     setCheckoutSession(null);
@@ -261,12 +445,13 @@ export default function EventBookingPage({ params }: Props) {
           </div>
         </div>
 
-        {bookingError && (
+        {(bookingError || checkoutError) && (
           <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3 text-red-700 shadow-sm">
             <AlertCircle size={20} className="shrink-0" />
             <p className="font-medium">
-              {(bookingError as { message?: string })?.message ||
-                "There was an issue processing your booking. Please try again."}
+              {(bookingError as any)?.message ||
+                checkoutError ||
+                "There was an issue processing your booking."}
             </p>
           </div>
         )}
@@ -280,7 +465,6 @@ export default function EventBookingPage({ params }: Props) {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            {/* Simplified Summary Card */}
             <div className="rounded-2xl bg-white p-6 shadow-md border border-gray-100">
               <div className="flex gap-4 items-start mb-6">
                 {event.image && (
@@ -352,6 +536,7 @@ export default function EventBookingPage({ params }: Props) {
                 ]}
                 maxTicketsPerUser={event.maxTicketsPerUser}
                 onBook={handleBook}
+                userPointsBalance={user?.pointsBalance || 0}
               />
 
               {checkoutSession && stripePromise && (
@@ -403,10 +588,12 @@ export default function EventBookingPage({ params }: Props) {
                 </div>
               )}
 
-              {isPending && (
+              {(isPending || isCreatingPaymentIntent) && (
                 <div className="text-center p-4 bg-white/50 rounded-xl border border-dashed border-gray-200 text-sm text-gray-500 font-medium flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-coral"></div>
-                  Finalizing your booking...
+                  {isCreatingPaymentIntent
+                    ? "Preparing secure payment session..."
+                    : "Finalizing your booking..."}
                 </div>
               )}
 

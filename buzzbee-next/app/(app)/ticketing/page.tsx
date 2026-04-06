@@ -50,27 +50,23 @@ export default function TicketingPage() {
     if (!selectedBooking) return null;
     
     const eventDate = new Date(selectedBooking.event.date).getTime();
-    const hoursUntilEvent = (eventDate - now) / (1000 * 60 * 60);
-
-    const SERVICE_FEE_PER_TICKET = 50;
-    const totalServiceFee = selectedBooking.quantity * SERVICE_FEE_PER_TICKET;
-    const ticketPriceSubtotal = selectedBooking.totalPrice - totalServiceFee;
+    const diffDays = (eventDate - now) / (1000 * 60 * 60 * 24);
 
     let refundPercentage = 0;
-    if (hoursUntilEvent > 48) {
-      refundPercentage = 1;
-    } else if (hoursUntilEvent >= 24) {
+    if (diffDays >= 7) {
+      refundPercentage = 0.9;
+    } else if (diffDays >= 3) {
+      refundPercentage = 0.75;
+    } else if (diffDays >= 1) {
       refundPercentage = 0.5;
     } else {
       refundPercentage = 0;
     }
 
-    const refundAmount = ticketPriceSubtotal * refundPercentage;
+    const refundAmount = selectedBooking.totalPrice * refundPercentage;
 
     return {
       total: selectedBooking.totalPrice,
-      subtotal: ticketPriceSubtotal,
-      serviceFee: totalServiceFee,
       percentage: refundPercentage * 100,
       amount: refundAmount,
     };
@@ -319,18 +315,17 @@ export default function TicketingPage() {
             </div>
             <div className="p-4 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Ticket Price ({selectedBooking?.quantity}x)</span>
-                <span className="text-slate-900 font-bold">Rs. {refundCalculation?.subtotal.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Service Fee (Non-refundable)</span>
-                <span className="text-slate-900 font-bold">Rs. {refundCalculation?.serviceFee.toLocaleString()}</span>
+                <span className="text-slate-500">Paid Amount</span>
+                <span className="text-slate-900 font-bold">Rs. {selectedBooking?.totalPrice.toLocaleString()}</span>
               </div>
               <div className="h-px bg-slate-100 w-full" />
               <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-slate-900">Total Refund Amount</span>
-                <span className="text-lg font-black text-brand-coral">Rs. {refundCalculation?.amount.toLocaleString()}</span>
+                <span className="text-sm font-bold text-slate-900">Points to be returned</span>
+                <span className="text-lg font-black text-brand-coral">{refundCalculation?.amount.toLocaleString()} BuzzBee Points</span>
               </div>
+              <p className="text-[10px] text-slate-400 italic">
+                * Refunds are processed as BuzzBee points which can be used for future bookings.
+              </p>
             </div>
           </div>
 

@@ -72,7 +72,7 @@ export default function AdminDashboardOverview() {
       color: "text-blue-600",
     },
     {
-      label: "Active Events",
+      label: "Total Events",
       value: platformStats ? platformStats.eventsCount.toString() : "...",
       icon: <Calendar size={20} />,
       bg: "bg-brand-peach/20",
@@ -330,6 +330,21 @@ export default function AdminDashboardOverview() {
                       </div>
                     </div>
                   </div>
+                  {user.verificationDocs && user.verificationDocs.length > 0 && (
+                    <div className="mb-3 flex flex-wrap gap-1">
+                      {user.verificationDocs.map((doc, idx) => (
+                        <a
+                          key={idx}
+                          href={doc.startsWith('http') ? doc : `#`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[9px] bg-blue-50 hover:bg-blue-100 text-blue-600 px-2 py-1 rounded flex items-center gap-1 transition-colors border border-blue-100"
+                        >
+                          View Doc {idx + 1}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
@@ -372,7 +387,7 @@ export default function AdminDashboardOverview() {
           </div>
         </div>
 
-        {/* Sponsorship / Boost Queue Card */}
+        {/* Sponsorship / Boost Queue Card
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
           <h2 className="font-bold text-slate-900 mb-6 flex items-center justify-between">
             Boost Requests
@@ -383,7 +398,7 @@ export default function AdminDashboardOverview() {
             )}
           </h2>
 
-          <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+          <div className="space-y-6 max-h-100 overflow-y-auto pr-2">
             {isLoadingSponsorships ? (
               <div className="text-center py-10 text-slate-400 text-xs font-bold uppercase tracking-widest animate-pulse">
                 Scanning Requests...
@@ -453,7 +468,7 @@ export default function AdminDashboardOverview() {
               ))
             )}
           </div>
-        </div>
+        </div> //CLOSE DIV */}
       </div>
 
       <ConfirmationModal

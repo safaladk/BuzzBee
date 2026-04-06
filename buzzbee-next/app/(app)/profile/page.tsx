@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/providers/auth-provider";
 import api from "@/lib/axios";
-import { User, Mail, Shield, Save, MapPin, Tag } from "lucide-react";
+import { User, Mail, Shield, Save, MapPin, Tag, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function ProfilePage() {
@@ -86,7 +86,7 @@ export default function ProfilePage() {
           <div className="p-8">
             <div className="flex flex-col md:flex-row gap-10">
               {/* Profile Avatar / Info side */}
-              <div className="flex flex-col items-center md:items-start gap-4 md:w-1/3">
+              <div className="flex flex-col items-center md:items-start gap-6 md:w-1/3">
                 <div className="w-32 h-32 rounded-full bg-brand-peach/50 flex items-center justify-center text-brand-coral border-4 border-white shadow-md">
                   <User size={64} />
                 </div>
@@ -97,9 +97,24 @@ export default function ProfilePage() {
                   <p className="text-gray-500 text-sm mb-3 capitalize">
                     {user.role} Account
                   </p>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full mt-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full">
                     <Shield size={14} />
                     Active member
+                  </div>
+                </div>
+
+                {/* BuzzBee Points Wallet */}
+                <div className="w-full bg-linear-to-br from-brand-coral to-brand-peach p-5 rounded-2xl text-white shadow-lg overflow-hidden relative group transition-transform hover:scale-[1.02]">
+                  <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-30 transition-opacity">
+                    <Wallet size={80} />
+                  </div>
+                  <div className="relative z-10">
+                    <p className="text-xs font-semibold uppercase tracking-wider opacity-90 mb-1">BuzzBee Points</p>
+                    <h3 className="text-3xl font-black mb-1">{user.pointsBalance || 0}</h3>
+                    <p className="text-[10px] opacity-80 leading-relaxed">
+                      1 Point = ₹1. <br/>
+                      Use points to buy tickets!
+                    </p>
                   </div>
                 </div>
               </div>

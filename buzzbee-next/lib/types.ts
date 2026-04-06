@@ -9,7 +9,7 @@ export interface Event {
   price: number;
   category: string;
   image: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REPORTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REPORTED' | 'CANCELLED';
   rejectionNote?: string;
   organizer?: User;
   isPublished?: boolean;
@@ -31,6 +31,7 @@ export interface User {
   fullName: string;
   email: string;
   role: 'attendee' | 'organizer' | 'admin';
+  pointsBalance: number;
   isVerified?: boolean;
   verificationDocs?: string[];
   interestedCategories?: string[];
@@ -83,5 +84,14 @@ export interface Booking {
   totalPrice: number;
   status: 'pending' | 'confirmed' | 'refund_pending' | 'refunded' | 'refund_rejected';
   refundReason?: string;
+  refundAmountPoints?: number;
+  refundRequestedAt?: string;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: number;
+  message: string;
+  isRead: boolean;
   createdAt: string;
 }

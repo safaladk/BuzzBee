@@ -34,6 +34,12 @@ export class Booking {
   @Column({ type: 'text', nullable: true })
   refundReason: string;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  refundAmountPoints: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  refundRequestedAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 }

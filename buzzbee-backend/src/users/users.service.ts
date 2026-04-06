@@ -72,6 +72,7 @@ export class UsersService {
     await this.repo.save(user);
 
     // omitting password from returning
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user;
     return result;
   }
@@ -81,6 +82,14 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     user.verificationDocs = documents;
+    return this.repo.save(user);
+  }
+
+  async updatePointsBalance(id: number, amount: number) {
+    const user = await this.repo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+
+    user.pointsBalance = Number(user.pointsBalance || 0) + Number(amount);
     return this.repo.save(user);
   }
 }

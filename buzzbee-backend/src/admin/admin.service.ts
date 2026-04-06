@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { Event } from '../events/event.entity';
 import { User } from '../users/user.entity';
 
@@ -26,14 +26,13 @@ export class AdminService {
     if (!event) {
       throw new NotFoundException('Event not found');
     }
-    
     event.status = status;
     if (rejectionNote) {
       event.rejectionNote = rejectionNote;
     }
 
     if (status === 'APPROVED') {
-       event.isPublished = true;
+      event.isPublished = true;
     }
 
     return this.eventRepo.save(event);
@@ -56,9 +55,10 @@ export class AdminService {
 
   async getPendingOrganizers() {
     return this.userRepo.find({
-      where: { 
-        isVerified: false, 
+      where: {
+        isVerified: false,
         role: 'organizer',
+        verificationDocs: Not(IsNull()),
       },
     });
   }
