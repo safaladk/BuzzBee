@@ -4,6 +4,8 @@ import { use, useState } from "react";
 import Link from "next/link";
 import { useEvent } from "@/features/events/queries";
 import { useCreateBooking } from "@/features/bookings/queries";
+import { useCreatePaymentIntent } from "@/features/payments/queries";
+import { PaymentIntentSession } from "@/features/payments/services";
 import { TicketPurchaseCard } from "@/features/bookings/components/TicketPurchaseCard";
 import {
   CheckCircle2,
@@ -13,6 +15,136 @@ import {
   Calendar,
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import {
+  CardElement,
+  Elements,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null;
+
+type CardPaymentPanelProps = {
+  checkoutSession: PaymentIntentSession;
+  isSubmitting: boolean;
+  onCancel: () => void;
+  onPaymentSucceeded: (paymentIntentId: string) => Promise<void>;
+};
+
+function CardPaymentPanel({
+  checkoutSession,
+  isSubmitting,
+  onCancel,
+  onPaymentSucceeded,
+}: CardPaymentPanelProps) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [cardError, setCardError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  async function handleConfirmPayment() {
+    if (!stripe || !elements) {
+      setCardError("Stripe is still loading. Please try again in a moment.");
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setCardError("Card input is unavailable. Please refresh and try again.");
+      return;
+    }
+
+    setCardError(null);
+    setIsConfirming(true);
+
+    const result = await stripe.confirmCardPayment(checkoutSession.clientSecret, {
+      payment_method: {
+        card: cardElement,
+      },
+    });
+
+    if (result.error) {
+      setCardError(result.error.message || "Payment failed. Please try again.");
+      setIsConfirming(false);
+      return;
+    }
+
+    const paymentIntentId = result.paymentIntent?.id;
+    if (!paymentIntentId) {
+      setCardError("Payment confirmation failed. Please try again.");
+      setIsConfirming(false);
+      return;
+    }
+
+    try {
+      await onPaymentSucceeded(paymentIntentId);
+    } catch {
+      setCardError(
+        "Payment was successful but booking confirmation failed. Please contact support.",
+      );
+    } finally {
+      setIsConfirming(false);
+    }
+  }
+
+  const isBusy = isConfirming || isSubmitting;
+
+  return (
+    <div className="rounded-2xl bg-white p-5 shadow-md border border-gray-100 space-y-4">
+      <h3 className="text-base font-bold text-gray-900">Pay with Card</h3>
+      <p className="text-sm text-gray-600">
+        Amount: <span className="font-semibold text-gray-900">{checkoutSession.currency.toUpperCase()} {checkoutSession.totalPrice.toFixed(2)}</span>
+      </p>
+
+      <div className="rounded-xl border border-gray-200 p-3 bg-gray-50">
+        <CardElement
+          options={{
+            style: {
+              base: {
+                fontSize: "16px",
+                color: "#111827",
+                "::placeholder": {
+                  color: "#9CA3AF",
+                },
+              },
+              invalid: {
+                color: "#DC2626",
+              },
+            },
+          }}
+        />
+      </div>
+
+      {cardError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          {cardError}
+        </div>
+      )}
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={handleConfirmPayment}
+          disabled={isBusy}
+          className="flex-1 bg-brand-coral text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:opacity-90 disabled:opacity-70"
+        >
+          {isBusy ? "Confirming..." : "Pay and Confirm Booking"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isBusy}
+          className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-70"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -20,11 +152,18 @@ export default function EventBookingPage({ params }: Props) {
   const { id } = use(params);
   const { data: event, isLoading } = useEvent(id);
   const {
-    mutate: createBooking,
+    mutateAsync: createBooking,
     isPending,
     error: bookingError,
   } = useCreateBooking();
+  const {
+    mutateAsync: createPaymentIntent,
+    isPending: isCreatingPaymentIntent,
+  } = useCreatePaymentIntent();
   const [confirmed, setConfirmed] = useState(false);
+  const [checkoutSession, setCheckoutSession] =
+    useState<PaymentIntentSession | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -46,23 +185,55 @@ export default function EventBookingPage({ params }: Props) {
   const sold = event.attendees ?? 0;
   const left = Math.max(capacity - sold, 0);
 
-  function handleBook(qty: number) {
+  async function handleBook(qty: number) {
+    setCheckoutError(null);
     const price = Number(event?.price || 0);
     const serviceFee = Number(event?.serviceFee || 0);
     const totalPrice = price * qty + serviceFee;
 
-    createBooking(
-      {
+    if (totalPrice <= 0) {
+      await createBooking({
         eventId: Number(event?.id),
         quantity: qty,
-        totalPrice: totalPrice,
-      },
-      {
-        onSuccess: () => {
-          setConfirmed(true);
-        },
-      },
-    );
+        totalPrice,
+      });
+      setConfirmed(true);
+      return;
+    }
+
+    if (!stripePromise) {
+      setCheckoutError(
+        "Stripe publishable key is missing. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in your frontend env.",
+      );
+      return;
+    }
+
+    try {
+      const session = await createPaymentIntent({
+        eventId: Number(event?.id),
+        quantity: qty,
+      });
+      setCheckoutSession(session);
+    } catch (error) {
+      setCheckoutError(
+        (error as { message?: string })?.message ||
+          "Unable to start checkout. Please try again.",
+      );
+    }
+  }
+
+  async function handlePaymentSucceeded(paymentIntentId: string) {
+    if (!checkoutSession) return;
+
+    await createBooking({
+      eventId: checkoutSession.eventId,
+      quantity: checkoutSession.quantity,
+      totalPrice: checkoutSession.totalPrice,
+      paymentIntentId,
+    });
+
+    setCheckoutSession(null);
+    setConfirmed(true);
   }
 
   const isFree = Number(event.price) === 0;
@@ -97,6 +268,13 @@ export default function EventBookingPage({ params }: Props) {
               {(bookingError as { message?: string })?.message ||
                 "There was an issue processing your booking. Please try again."}
             </p>
+          </div>
+        )}
+
+        {checkoutError && (
+          <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 flex items-center gap-3 text-red-700 shadow-sm">
+            <AlertCircle size={20} className="shrink-0" />
+            <p className="font-medium">{checkoutError}</p>
           </div>
         )}
 
@@ -176,6 +354,20 @@ export default function EventBookingPage({ params }: Props) {
                 onBook={handleBook}
               />
 
+              {checkoutSession && stripePromise && (
+                <Elements stripe={stripePromise}>
+                  <CardPaymentPanel
+                    checkoutSession={checkoutSession}
+                    isSubmitting={isPending}
+                    onCancel={() => {
+                      setCheckoutSession(null);
+                      setCheckoutError(null);
+                    }}
+                    onPaymentSucceeded={handlePaymentSucceeded}
+                  />
+                </Elements>
+              )}
+
               {confirmed && (
                 <div className="rounded-xl bg-green-50 border border-green-200 p-5 text-green-800 shadow-md animate-in fade-in slide-in-from-top-4 duration-500">
                   <div className="flex items-start gap-3">
@@ -215,6 +407,13 @@ export default function EventBookingPage({ params }: Props) {
                 <div className="text-center p-4 bg-white/50 rounded-xl border border-dashed border-gray-200 text-sm text-gray-500 font-medium flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-coral"></div>
                   Finalizing your booking...
+                </div>
+              )}
+
+              {isCreatingPaymentIntent && (
+                <div className="text-center p-4 bg-white/50 rounded-xl border border-dashed border-gray-200 text-sm text-gray-500 font-medium flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-coral"></div>
+                  Preparing secure payment session...
                 </div>
               )}
             </div>

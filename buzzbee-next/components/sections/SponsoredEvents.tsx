@@ -12,7 +12,8 @@ export function SponsoredEvents() {
 
   const sponsoredEvents = allEvents
     ? allEvents.filter(
-        (e) => e.isSponsored && new Date(e.date).getTime() >= new Date().getTime()
+        (e) =>
+          e.isSponsored && new Date(e.date).getTime() >= new Date().getTime(),
       )
     : [];
 
@@ -40,7 +41,8 @@ export function SponsoredEvents() {
             BuzzBee Spotlight
           </h2>
           <p className="text-gray-600 mt-2 max-w-2xl text-lg">
-            Discover premium, hand-picked experiences you won&apos;t want to miss.
+            Discover premium, hand-picked experiences you won&apos;t want to
+            miss.
           </p>
         </div>
 
@@ -58,22 +60,24 @@ export function SponsoredEvents() {
                 <Calendar size={120} className="text-white" />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-gray-950 via-gray-900/60 to-transparent"></div>
           </div>
 
           <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12 z-10">
             <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-6 duration-700">
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <span className="bg-amber-500 text-white font-bold px-4 py-1.5 rounded-full text-sm">
-                  {Number(activeEvent.price) > 0 ? `Rs. ${activeEvent.price}` : "Free"}
+                  {Number(activeEvent.price) > 0
+                    ? `Rs. ${activeEvent.price}`
+                    : "Free"}
                 </span>
-                <span className="flex items-center gap-1.5 text-amber-200 font-semibold text-sm">
+                <span className="flex items-center gap-1.5 text-gray-300 font-semibold text-sm">
                   <Calendar size={16} />
                   {new Date(activeEvent.date).toLocaleDateString(undefined, {
                     weekday: "long",
                     month: "long",
                     day: "numeric",
-                    year: "numeric"
+                    year: "numeric",
                   })}
                 </span>
                 <span className="flex items-center gap-1.5 text-gray-300 font-semibold text-sm">
@@ -81,18 +85,19 @@ export function SponsoredEvents() {
                   {activeEvent.location}, {activeEvent.district}
                 </span>
               </div>
-              
-              <h3 className="text-3xl md:text-5xl font-black text-white mb-4 leading-tight">
+
+              <h3 className="text-xl md:text-2xl font-black text-white mb-4 leading-tight">
                 {activeEvent.title}
               </h3>
-              
-              <p className="text-gray-300 text-lg md:text-xl line-clamp-2 md:line-clamp-3 mb-8 max-w-2xl font-medium">
-                {activeEvent.description || "Join this amazing event powered by BuzzBee!"}
+
+              <p className="text-gray-300 text-sm md:text-base line-clamp-2 md:line-clamp-3 mb-8 max-w-2xl font-medium">
+                {activeEvent.description ||
+                  "Join this amazing event powered by BuzzBee!"}
               </p>
-              
+
               <Link href={`/events/${activeEvent.id}`}>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="md"
                   className="bg-amber-600 hover:bg-amber-500 text-white border-none shadow-lg shadow-amber-900/50"
                 >
                   Book Your Ticket
@@ -109,7 +114,9 @@ export function SponsoredEvents() {
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
                   className={`h-2.5 rounded-full transition-all duration-300 ${
-                    idx === currentIndex ? "w-8 bg-amber-500" : "w-2.5 bg-white/40 hover:bg-white/70"
+                    idx === currentIndex
+                      ? "w-8 bg-amber-500"
+                      : "w-2.5 bg-white/40 hover:bg-white/70"
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
