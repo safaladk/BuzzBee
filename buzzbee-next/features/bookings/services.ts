@@ -5,6 +5,7 @@ export interface BookingPayload {
   eventId: number;
   quantity: number;
   totalPrice: number;
+  paymentIntentId?: string;
 }
 
 export const bookingService = {
