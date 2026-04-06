@@ -1,20 +1,27 @@
-import { get, post, patch } from '@/lib/axios';
-import { Booking } from '@/lib/types';
+import { get, post } from '@/lib/axios';
 
 export interface BookingPayload {
   eventId: number;
   quantity: number;
   totalPrice: number;
-  paymentIntentId?: string;
+}
+
+export interface BookingResponse {
+  id: number;
+  quantity: number;
+  totalPrice: number;
+  status: string;
+  createdAt: string;
+  event: {
+    id: number;
+    title: string;
+    date: string;
+    location: string;
+    image: string;
+  };
 }
 
 export const bookingService = {
-  create: (data: BookingPayload) => post<Booking>('/bookings', data),
-  getMyBookings: () => get<Booking[]>('/bookings/my-bookings'),
-  requestRefund: (id: number, reason: string) => 
-    patch<Booking>(`/bookings/${id}/request-refund`, { reason }),
-  getPendingRefunds: () => 
-    get<Booking[]>('/bookings/admin/pending-refunds'),
-  processRefund: (id: number, status: 'refunded' | 'refund_rejected') => 
-    patch<Booking>(`/bookings/${id}/admin/process-refund`, { status }),
+  create: (data: BookingPayload) => post<BookingResponse>('/bookings', data),
+  getMyBookings: () => get<BookingResponse[]>('/bookings/my-bookings'),
 };

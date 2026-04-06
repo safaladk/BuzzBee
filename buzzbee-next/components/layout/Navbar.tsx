@@ -1,55 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Bell, LogIn, Menu, Plus, User, X } from "lucide-react";
 import { Button } from "../ui/Button";
 import { useAuth } from "@/app/providers/auth-provider";
-import api from "@/lib/axios";
-import { Event } from "@/lib/types";
 
 
 
 export const Navbar = () => {
-  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
   const router = useRouter();
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    if (user && (user.interestedCategories?.length || user.interestedLocations?.length)) {
-      const fetchRecommended = async () => {
-        try {
-          const res = await api.get("/events");
-          const allEvents: Event[] = res.data;
-          const matchingEvents = allEvents.filter((event) => {
-            const matchesCategory = user.interestedCategories?.includes(event.category || "");
-            const matchesLocation = user.interestedLocations?.includes(event.district || "");
-            return matchesCategory || matchesLocation;
-          });
-          // Sort by date (newest first roughly) and limit to 5
-          setRecommendedEvents(matchingEvents.slice(0, 5));
-        } catch (err) {
-          console.error("Failed to fetch notifications", err);
-        }
-      };
-      // For immediate load (simulate polling or real-time)
-      fetchRecommended();
-    }
-  }, [user]);
-
-  if (pathname?.startsWith('/admin')) {
-    return null;
-  }
 
   const handleAuthClick = () => {
     router.push("/login");
   };
-
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -110,74 +78,10 @@ export const Navbar = () => {
                 Create Event
               </Button>
             )}
-            {user && (
-              <div className="relative">
-                <button 
-                  className="relative p-2 text-gray-600 hover:text-brand-coral transition-colors cursor-pointer"
-                  onClick={() => {
-                    setNotificationsOpen((prev) => !prev);
-                    setProfileMenuOpen(false);
-                  }}
-                >
-                  <Bell size={22} />
-                  {recommendedEvents.length > 0 && (
-                    <span className="absolute top-1 right-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
-                      {recommendedEvents.length}
-                    </span>
-                  )}
-                </button>
-
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                      <p className="text-sm font-semibold text-gray-800">
-                        Recommended Events
-                      </p>
-                      <button 
-                        onClick={() => setNotificationsOpen(false)}
-                        className="p-1 hover:bg-gray-200 rounded-full text-gray-500"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto">
-                      {recommendedEvents.length > 0 ? (
-                        recommendedEvents.map((event) => (
-                          <div 
-                            key={event.id}
-                            className="px-4 py-3 border-b border-gray-50 hover:bg-brand-peach/10 cursor-pointer transition-colors"
-                            onClick={() => {
-                              router.push(`/events/${event.id}`);
-                              setNotificationsOpen(false);
-                            }}
-                          >
-                            <p className="text-sm font-medium text-gray-900 line-clamp-1">{event.title}</p>
-                            <p className="text-xs text-gray-500 mt-1 flex gap-2">
-                              {user.interestedCategories?.includes(event.category) && (
-                                <span className="text-brand-coral font-semibold">Matched Category</span>
-                              )}
-                              {user.interestedLocations?.includes(event.district) && (
-                                <span className="text-amber-600 font-semibold">Matched Location</span>
-                              )}
-                            </p>
-                            <p className="text-[10px] text-gray-400 mt-1">
-                              {new Date(event.date).toLocaleDateString()} • {event.district}
-                            </p>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="px-4 py-6 text-center">
-                          <p className="text-sm text-gray-500">No new recommendations yet based on your interests.</p>
-                          <Link href="/profile" className="text-xs text-brand-coral hover:underline mt-2 block" onClick={() => setNotificationsOpen(false)}>
-                            Update Interests
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            <button className="relative p-2 text-gray-600 hover:text-brand-coral transition-colors cursor-pointer">
+              <Bell size={22} />
+              {/* <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span> */}
+            </button>
             {user ? (
               <div className="relative">
                 <button
@@ -203,15 +107,6 @@ export const Navbar = () => {
                         {user.role}
                       </p>
                     </div>
-                    {user.role === 'admin' && (
-                      <Link
-                        href="/admin"
-                        className="block w-full text-left px-4 py-2 text-sm text-brand-coral font-bold hover:bg-brand-peach/10 border-b border-gray-100"
-                        onClick={() => setProfileMenuOpen(false)}
-                      >
-                        Admin Dashboard
-                      </Link>
-                    )}
                     <Link
                       href="/favorites"
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100"
@@ -308,15 +203,6 @@ export const Navbar = () => {
                     {user.role}
                   </p>
                 </div>
-                {user.role === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="flex w-full items-center justify-start text-left px-4 py-2 text-sm font-bold text-brand-coral hover:bg-brand-peach/10 rounded-lg transition-colors border border-brand-coral/20 mt-2 mb-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Admin Dashboard
-                  </Link>
-                )}
                 <Link
                   href="/favorites"
                   className="flex w-full items-center justify-start text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"

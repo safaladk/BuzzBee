@@ -1,5 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { User } from '../users/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Event {
@@ -53,21 +52,6 @@ export class Event {
 
   @Column({ type: 'int', nullable: true, default: null })
   maxTicketsPerUser: number;
-
-  @Column({ default: 'PENDING' })
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REPORTED';
-
-  @Column({ type: 'text', nullable: true })
-  rejectionNote: string;
-
-  @Column({ default: false })
-  isSponsored: boolean;
-
-  @Column({ default: 'NONE' })
-  sponsorshipStatus: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
-
-  @ManyToOne(() => User, { eager: true })
-  organizer: User;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

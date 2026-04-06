@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/providers/auth-provider";
 import api from "@/lib/axios";
-import { User, Mail, Shield, Save, MapPin, Tag } from "lucide-react";
+import { User, Mail, Shield, Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function ProfilePage() {
@@ -15,38 +15,20 @@ export default function ProfilePage() {
     type: "success" | "error";
   } | null>(null);
 
-  const [interestedCategories, setInterestedCategories] = useState<string[]>([]);
-  const [interestedLocations, setInterestedLocations] = useState<string[]>([]);
-
-  const AVAILABLE_CATEGORIES = ["Music", "Art", "Food", "Sports", "Technology", "Wellness", "Comedy", "Education"];
-  const AVAILABLE_LOCATIONS = ["Kathmandu", "Lalitpur", "Bhaktapur", "Kaski", "Chitwan", "Morang", "Rupandehi", "Jhapa"];
-
   useEffect(() => {
     if (user) {
       setFullName(user.fullName || "");
-      setInterestedCategories(user.interestedCategories || []);
-      setInterestedLocations(user.interestedLocations || []);
     }
   }, [user]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const hasChanges = 
-      fullName !== (user?.fullName || "") ||
-      JSON.stringify(interestedCategories) !== JSON.stringify(user?.interestedCategories || []) ||
-      JSON.stringify(interestedLocations) !== JSON.stringify(user?.interestedLocations || []);
-
-    if (!fullName.trim() || !hasChanges) return;
+    if (!fullName.trim() || fullName === user?.fullName) return;
 
     setIsUpdating(true);
     setMessage(null);
     try {
-      await api.put("/auth/me", { 
-        fullName,
-        interestedCategories,
-        interestedLocations
-      });
+      await api.put("/auth/me", { fullName });
       await refreshUser();
       setMessage({ text: "Profile updated successfully!", type: "success" });
     } catch {
@@ -150,91 +132,11 @@ export default function ProfilePage() {
                     </p>
                   </div>
 
-                  {/* Interested Categories Section */}
-                  <div className="pt-4 border-t border-gray-100">
-                    <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <Tag size={16} className="text-gray-400" />
-                      Interested Categories
-                    </label>
-                    <p className="text-xs text-gray-500 mb-3 ml-1">
-                      Select categories you want to get notified about
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {AVAILABLE_CATEGORIES.map((cat) => {
-                        const isSelected = interestedCategories.includes(cat);
-                        return (
-                          <button
-                            type="button"
-                            key={cat}
-                            onClick={() => {
-                              setInterestedCategories((prev) =>
-                                isSelected
-                                  ? prev.filter((c) => c !== cat)
-                                  : [...prev, cat]
-                              );
-                            }}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
-                              isSelected
-                                ? "bg-brand-coral text-white border-brand-coral"
-                                : "bg-white text-gray-700 border-gray-200 hover:border-brand-coral hover:text-brand-coral"
-                            }`}
-                          >
-                            {cat}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Interested Locations Section */}
-                  <div className="pt-4 border-t border-gray-100">
-                    <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <MapPin size={16} className="text-gray-400" />
-                      Interested Locations
-                    </label>
-                    <p className="text-xs text-gray-500 mb-3 ml-1">
-                      Select districts where you frequently attend events
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {AVAILABLE_LOCATIONS.map((loc) => {
-                        const isSelected = interestedLocations.includes(loc);
-                        return (
-                          <button
-                            type="button"
-                            key={loc}
-                            onClick={() => {
-                              setInterestedLocations((prev) =>
-                                isSelected
-                                  ? prev.filter((l) => l !== loc)
-                                  : [...prev, loc]
-                              );
-                            }}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
-                              isSelected
-                                ? "bg-brand-coral text-white border-brand-coral"
-                                : "bg-white text-gray-700 border-gray-200 hover:border-brand-coral hover:text-brand-coral"
-                            }`}
-                          >
-                            {loc}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
                   <div className="pt-4 border-t border-gray-100 flex justify-end">
                     <Button
                       variant="primary"
                       type="submit"
-                      disabled={
-                        isUpdating ||
-                        (!fullName.trim()) ||
-                        (fullName === (user.fullName || "") &&
-                          JSON.stringify(interestedCategories) ===
-                            JSON.stringify(user.interestedCategories || []) &&
-                          JSON.stringify(interestedLocations) ===
-                            JSON.stringify(user.interestedLocations || []))
-                      }
+                      disabled={isUpdating || fullName === user.fullName}
                       className="min-w-[140px]"
                       icon={<Save size={18} />}
                     >

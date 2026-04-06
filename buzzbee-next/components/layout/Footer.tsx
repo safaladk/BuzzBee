@@ -1,21 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/app/providers/auth-provider";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
 export const Footer = () => {
-  const pathname = usePathname();
   const { user } = useAuth();
   const router = useRouter();
   const [showOrganizerModal, setShowOrganizerModal] = useState(false);
-
-  if (pathname?.startsWith('/admin')) {
-    return null;
-  }
 
   const handleCreateEventClick = (e: React.MouseEvent) => {
     if (user?.role !== "organizer") {

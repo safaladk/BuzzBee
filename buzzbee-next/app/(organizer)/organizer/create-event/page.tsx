@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/Button";
 import { useCreateEvent, useUpdateEvent } from "@/features/events/queries";
 import { useSearchParams, useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { eventService } from "@/features/events/services";
 import { CreateEventPayload } from "@/lib/types";
 
@@ -52,8 +51,6 @@ function CreateEventContent() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageMode, setImageMode] = useState<"url" | "file">("url");
   const [localError, setLocalError] = useState<string | null>(null);
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -118,7 +115,7 @@ function CreateEventContent() {
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/events/${editingId}`,
           {
             headers: {
-              Authorization: `Bearer ${Cookies.get("token")}`,
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           },
         );
@@ -198,10 +195,6 @@ function CreateEventContent() {
     }
     if ((Number(formData.maxTicketsPerUser) ?? 0) < 0) {
       setLocalError("Max tickets per user must be 0 or greater");
-      return false;
-    }
-    if (!agreeTerms) {
-      setLocalError("You must agree to the Organizer Privacy Policy and Terms of Service");
       return false;
     }
     return true;
@@ -590,33 +583,6 @@ function CreateEventContent() {
               )}
             </div>
 
-            {/* Terms Checkbox */}
-            <div className="mt-6 mb-4">
-              <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={agreeTerms}
-                  onChange={(e) => {
-                    setAgreeTerms(e.target.checked);
-                    if (e.target.checked) setLocalError(null);
-                  }}
-                  className="mt-1 accent-amber-600"
-                />
-                <span>
-                  I agree to the{" "}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowTermsModal(true);
-                    }}
-                    className="text-amber-600 hover:underline font-semibold"
-                  >
-                    Organizer Privacy Policy and Terms of Service
-                  </button>
-                </span>
-              </label>
-            </div>
-
             {/* Submit Buttons */}
             <div className="flex gap-4 pt-6 border-t border-gray-200">
               <Button
@@ -648,47 +614,6 @@ function CreateEventContent() {
               </Button>
             </div>
           </form>
-
-          {/* Organizer Modal Overlay */}
-          {showTermsModal && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
-              <div className="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                  <h3 className="text-lg font-bold">Organizer Privacy Policy</h3>
-                  <button
-                    type="button"
-                    onClick={() => setShowTermsModal(false)}
-                    className="text-gray-500 hover:text-gray-800"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-                <div className="p-6 overflow-y-auto text-sm text-gray-600 space-y-4">
-                  <h4 className="font-semibold text-gray-800">1. Attendee Data Handling</h4>
-                  <p>As an organizer, you are granted access to attendee information (like emails) strictly for the purpose of communicating updates related to the specific event. You agree NOT to use this data for unsolicited marketing outside BuzzBee.</p>
-                  
-                  <h4 className="font-semibold text-gray-800">2. Payouts and Fees</h4>
-                  <p>BuzzBee deducts platform fees for all ticket sales automatically. You are responsible for all applicable local taxes incurred from your event revenue.</p>
-                  
-                  <h4 className="font-semibold text-gray-800">3. Prohibited Content</h4>
-                  <p>You agree not to publish events containing offensive, illegal, or misleading content. We reserve the right to suspend events violating our community guidelines.</p>
-                  
-                  <h4 className="font-semibold text-gray-800">4. Cancellations</h4>
-                  <p>If you cancel the event, you are solely responsible for reimbursing attendees securely via the platform processing logic.</p>
-                </div>
-                <div className="p-4 border-t bg-gray-50 flex justify-end">
-                  <Button type="button" onClick={() => {
-                    setAgreeTerms(true);
-                    setLocalError(null);
-                    setShowTermsModal(false);
-                  }}>
-                    I Agree
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
         </div>
       </div>
     </div>

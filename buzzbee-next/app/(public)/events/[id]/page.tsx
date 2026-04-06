@@ -7,7 +7,6 @@ import { Calendar, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useEvent } from "@/features/events/queries";
 import { TicketPurchaseCard } from "@/features/bookings/components/TicketPurchaseCard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { User } from "@/lib/types";
 
 interface EventDetailPageProps {
   params: Promise<{ id: string }>;
@@ -79,7 +78,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold text-white bg-brand-coral shadow-md">
             {event.category}
           </span>
-          {event.status === 'APPROVED' && (
+          {event.verified && (
             <span className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-sm font-semibold text-white bg-green-500 shadow-md">
               <ShieldCheck size={16} /> Verified
             </span>
@@ -91,15 +90,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           )}
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-2">
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
           {event.title}
         </h1>
-        
-        {event.organizer && (
-          <p className="text-lg text-gray-600 font-medium mb-6">
-            Organized by <span className="text-brand-coral font-bold">{event.organizer.fullName}</span>
-          </p>
-        )}
 
         {event.image && (
           <div className="mb-6 rounded-2xl overflow-hidden shadow-md">
@@ -136,7 +129,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               <p className="text-gray-700 leading-relaxed">
                 {event.description ||
                   `Enjoy community, culture, and creativity at ${event.title}.`}
-                {event.organizer ? ` Organized by ${event.organizer.fullName}.` : ""}
+                {event.organizer ? ` Organized by ${event.organizer}.` : ""}
               </p>
             </div>
 
@@ -182,7 +175,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 <div className="flex flex-col">
                   <span className="text-sm text-gray-500 mb-1">Organizer</span>
                   <span className="font-semibold text-gray-900">
-                    {event.organizer?.fullName || "BuzzBee Host"}
+                    {event.organizer || "BuzzBee Host"}
                   </span>
                 </div>
                 <div className="flex flex-col">

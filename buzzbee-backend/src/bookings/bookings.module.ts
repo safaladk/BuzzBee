@@ -4,10 +4,9 @@ import { Booking } from './booking.entity';
 import { BookingsService } from './bookings.service';
 import { BookingsController } from './bookings.controller';
 import { Event } from '../events/event.entity';
-import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking, Event]), PaymentsModule],
+  imports: [TypeOrmModule.forFeature([Booking, Event])],
   controllers: [BookingsController],
   providers: [BookingsService],
   exports: [BookingsService],

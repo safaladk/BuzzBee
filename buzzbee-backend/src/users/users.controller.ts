@@ -43,15 +43,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user profile' })
-  updateProfile(@Request() req: any, @Body() dto: UpdateProfileDto) {
+  updateProfile(@Request() req, @Body() dto: UpdateProfileDto) {
     return this.service.updateProfile(req.user.id, dto);
-  }
-
-  @Post('verify-organizer')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Submit organizer verification documents' })
-  submitVerification(@Request() req: any, @Body('documents') documents: string[]) {
-    return this.service.submitVerification(req.user.id, documents);
   }
 }

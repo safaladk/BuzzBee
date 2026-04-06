@@ -9,8 +9,6 @@ import { authService } from "@/features/auth/services";
 const { login } = authService;
 
 import { useAuth } from "@/app/providers/auth-provider";
-import api from "@/lib/axios";
-import { User } from "@/lib/types";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,20 +25,9 @@ export default function LoginPage() {
     setError(null);
     try {
       await login({ email, password });
-      // In a real app, refreshUser might not be enough to get the state immediately due to React state batching.
-      // Let's fetch the profile data directly to handle the redirect.
-      const response = await api.get<User>("/auth/me");
-      const user = response.data;
       await refreshUser();
-      
-      // Role-based redirection
-      if (user.role === 'admin') {
-        router.push("/admin");
-      } else if (user.role === 'organizer') {
-        router.push("/organizer/dashboard");
-      } else {
-        router.push("/");
-      }
+      // Redirect after successful login
+      router.push("/");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Login failed";
       setError(msg);

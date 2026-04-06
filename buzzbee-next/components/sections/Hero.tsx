@@ -1,22 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Search, MapPin } from "lucide-react";
 import { Button } from "../ui/Button";
 
 export const Hero = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/events?q=${encodeURIComponent(searchQuery)}`);
-    } else {
-      router.push("/events");
-    }
-  };
-
   return (
     <div className="relative overflow-hidden bg-black text-white">
       {/* dark overlay */}
@@ -45,9 +32,6 @@ export const Hero = () => {
               <input
                 type="text"
                 placeholder="Search events, concerts, workshops..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="flex-1 bg-transparent outline-none text-black placeholder-gray-400"
               />
             </div>
@@ -64,7 +48,6 @@ export const Hero = () => {
             <Button
               variant="primary"
               size="lg"
-              onClick={handleSearch}
               className="md:w-auto w-full flex items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition-transform"
             >
               <Search size={20} />

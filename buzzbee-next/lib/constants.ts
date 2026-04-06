@@ -28,13 +28,7 @@ export const sampleEvents: Event[] = [
     price: 500,
     category: 'Music',
     image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=1200&q=80',
-    status: 'APPROVED',
-    organizer: {
-      id: 1,
-      fullName: 'Jazz Nepal',
-      email: 'contact@jazznepal.com',
-      role: 'organizer'
-    },
+    organizer: 'Jazz Nepal',
     verified: true,
     attendees: 234,
     rating: 4.8,
@@ -50,13 +44,7 @@ export const sampleEvents: Event[] = [
     price: 0,
     category: 'Art',
     image: 'https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?auto=format&fit=crop&w=1200&q=80',
-    status: 'APPROVED',
-    organizer: {
-      id: 2,
-      fullName: 'Local Artists Collective',
-      email: 'hello@localartistscollective.com',
-      role: 'organizer'
-    },
+    organizer: 'Local Artists Collective',
     verified: true,
     attendees: 45,
     rating: 4.6,
@@ -72,13 +60,7 @@ export const sampleEvents: Event[] = [
     price: 300,
     category: 'Food',
     image: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1200&q=80',
-    status: 'APPROVED',
-    organizer: {
-      id: 3,
-      fullName: 'Pokhara Food Culture',
-      email: 'team@pokharafoodculture.com',
-      role: 'organizer'
-    },
+    organizer: 'Pokhara Food Culture',
     verified: true,
     attendees: 156,
     rating: 4.9,
@@ -94,13 +76,7 @@ export const sampleEvents: Event[] = [
     price: 0,
     category: 'Technology',
     image: 'https://images.unsplash.com/photo-1529333166433-5eebc6b14ebf?auto=format&fit=crop&w=1200&q=80',
-    status: 'APPROVED',
-    organizer: {
-      id: 4,
-      fullName: 'Nepal Tech Hub',
-      email: 'connect@nepaltechhub.com',
-      role: 'organizer'
-    },
+    organizer: 'Nepal Tech Hub',
     verified: true,
     attendees: 89,
     rating: 4.7,
@@ -116,13 +92,7 @@ export const sampleEvents: Event[] = [
     price: 200,
     category: 'Sports',
     image: 'https://images.unsplash.com/photo-1508606572321-901ea443707f?auto=format&fit=crop&w=1200&q=80',
-    status: 'APPROVED',
-    organizer: {
-      id: 5,
-      fullName: 'Run Nepal',
-      email: 'support@runnepal.com',
-      role: 'organizer'
-    },
+    organizer: 'Run Nepal',
     verified: true,
     attendees: 312,
     rating: 4.5,
@@ -138,13 +108,7 @@ export const sampleEvents: Event[] = [
     price: 0,
     category: 'Wellness',
     image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1200&q=80',
-    status: 'APPROVED',
-    organizer: {
-      id: 6,
-      fullName: 'Wellness Nepal',
-      email: 'namaste@wellnessnepal.com',
-      role: 'organizer'
-    },
+    organizer: 'Wellness Nepal',
     verified: false,
     attendees: 67,
     rating: 4.4,

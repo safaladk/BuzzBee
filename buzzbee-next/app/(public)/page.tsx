@@ -1,7 +1,6 @@
 "use client";
 
 import { Hero } from "@/components/sections/Hero";
-import { SponsoredEvents } from "@/components/sections/SponsoredEvents";
 import { StatsSection } from "@/components/sections/StatsSection";
 import { stats as fallbackStats } from "@/lib/constants";
 import { EventsAroundDate } from "@/components/sections/EventsAroundDate";
@@ -40,7 +39,6 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gray-50">
       <Hero />
       <StatsSection stats={displayStats} />
-      <SponsoredEvents />
       <EventsAroundDate />
     </div>
   );
