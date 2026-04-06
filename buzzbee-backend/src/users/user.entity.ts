@@ -26,6 +26,18 @@ export class User {
   @Column({ default: false })
   termsAccepted: boolean;
 
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @Column({ type: 'text', nullable: true, array: true })
+  verificationDocs: string[];
+
+  @Column({ type: 'text', nullable: true, array: true })
+  interestedCategories: string[];
+
+  @Column({ type: 'text', nullable: true, array: true })
+  interestedLocations: string[];
+
   @CreateDateColumn()
   createdAt: Date;
 

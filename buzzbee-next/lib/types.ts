@@ -9,9 +9,12 @@ export interface Event {
   price: number;
   category: string;
   image: string;
-  organizer?: string;
-  verified?: boolean;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REPORTED';
+  rejectionNote?: string;
+  organizer?: User;
+  isPublished?: boolean;
   attendees?: number;
+  verified?: boolean;
   rating?: number;
   isFree?: boolean;
   capacity?: number;
@@ -19,12 +22,20 @@ export interface Event {
   revenue?: number;
   maxTicketsPerUser?: number;
   highlights?: string;
+  isSponsored?: boolean;
+  sponsorshipStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 export interface User {
+  id: number;
   fullName: string;
   email: string;
-  role: 'user' | 'organizer' | 'admin';
+  role: 'attendee' | 'organizer' | 'admin';
+  isVerified?: boolean;
+  verificationDocs?: string[];
+  interestedCategories?: string[];
+  interestedLocations?: string[];
+  createdAt?: string;
 }
 
 export interface Category {
@@ -62,4 +73,15 @@ export interface PlatformStats {
   organizersCount: number;
   citiesCount: number;
   totalRevenue: number;
+}
+
+export interface Booking {
+  id: number;
+  user: User;
+  event: Event;
+  quantity: number;
+  totalPrice: number;
+  status: 'pending' | 'confirmed' | 'refund_pending' | 'refunded' | 'refund_rejected';
+  refundReason?: string;
+  createdAt: string;
 }
