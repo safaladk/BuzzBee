@@ -26,6 +26,21 @@ export class User {
   @Column({ default: false })
   termsAccepted: boolean;
 
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @Column({ type: 'text', nullable: true, array: true })
+  verificationDocs: string[];
+
+  @Column({ type: 'text', nullable: true, array: true })
+  interestedCategories: string[];
+
+  @Column({ type: 'text', nullable: true, array: true })
+  interestedLocations: string[];
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  pointsBalance: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

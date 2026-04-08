@@ -28,6 +28,12 @@ export class Booking {
   @Column({ default: 'confirmed' })
   status: string; // 'pending' | 'confirmed' | 'cancelled'
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  refundAmountPoints: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  refundRequestedAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 }

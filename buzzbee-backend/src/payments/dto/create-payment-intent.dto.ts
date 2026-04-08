@@ -1,7 +1,7 @@
-import { IsNumber, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
-export class CreateBookingDto {
+export class CreatePaymentIntentDto {
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
@@ -11,15 +11,6 @@ export class CreateBookingDto {
   @IsNotEmpty()
   @Type(() => Number)
   quantity: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Type(() => Number)
-  totalPrice: number;
-
-  @IsString()
-  @IsOptional()
-  paymentIntentId?: string;
 
   @IsOptional()
   @IsNumber()

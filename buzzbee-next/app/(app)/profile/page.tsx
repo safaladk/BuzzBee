@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/providers/auth-provider";
 import api from "@/lib/axios";
-import { User, Mail, Shield, Save } from "lucide-react";
+import { User, Mail, Shield, Save, MapPin, Tag, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function ProfilePage() {
@@ -15,20 +15,38 @@ export default function ProfilePage() {
     type: "success" | "error";
   } | null>(null);
 
+  const [interestedCategories, setInterestedCategories] = useState<string[]>([]);
+  const [interestedLocations, setInterestedLocations] = useState<string[]>([]);
+
+  const AVAILABLE_CATEGORIES = ["Music", "Art", "Food", "Sports", "Technology", "Wellness", "Comedy", "Education"];
+  const AVAILABLE_LOCATIONS = ["Kathmandu", "Lalitpur", "Bhaktapur", "Kaski", "Chitwan", "Morang", "Rupandehi", "Jhapa"];
+
   useEffect(() => {
     if (user) {
       setFullName(user.fullName || "");
+      setInterestedCategories(user.interestedCategories || []);
+      setInterestedLocations(user.interestedLocations || []);
     }
   }, [user]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || fullName === user?.fullName) return;
+    
+    const hasChanges = 
+      fullName !== (user?.fullName || "") ||
+      JSON.stringify(interestedCategories) !== JSON.stringify(user?.interestedCategories || []) ||
+      JSON.stringify(interestedLocations) !== JSON.stringify(user?.interestedLocations || []);
+
+    if (!fullName.trim() || !hasChanges) return;
 
     setIsUpdating(true);
     setMessage(null);
     try {
-      await api.put("/auth/me", { fullName });
+      await api.put("/auth/me", { 
+        fullName,
+        interestedCategories,
+        interestedLocations
+      });
       await refreshUser();
       setMessage({ text: "Profile updated successfully!", type: "success" });
     } catch {
@@ -68,7 +86,7 @@ export default function ProfilePage() {
           <div className="p-8">
             <div className="flex flex-col md:flex-row gap-10">
               {/* Profile Avatar / Info side */}
-              <div className="flex flex-col items-center md:items-start gap-4 md:w-1/3">
+              <div className="flex flex-col items-center md:items-start gap-6 md:w-1/3">
                 <div className="w-32 h-32 rounded-full bg-brand-peach/50 flex items-center justify-center text-brand-coral border-4 border-white shadow-md">
                   <User size={64} />
                 </div>
@@ -79,9 +97,24 @@ export default function ProfilePage() {
                   <p className="text-gray-500 text-sm mb-3 capitalize">
                     {user.role} Account
                   </p>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full mt-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full">
                     <Shield size={14} />
                     Active member
+                  </div>
+                </div>
+
+                {/* BuzzBee Points Wallet */}
+                <div className="w-full bg-linear-to-br from-brand-coral to-brand-peach p-5 rounded-2xl text-white shadow-lg overflow-hidden relative group transition-transform hover:scale-[1.02]">
+                  <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-30 transition-opacity">
+                    <Wallet size={80} />
+                  </div>
+                  <div className="relative z-10">
+                    <p className="text-xs font-semibold uppercase tracking-wider opacity-90 mb-1">BuzzBee Points</p>
+                    <h3 className="text-3xl font-black mb-1">{user.pointsBalance || 0}</h3>
+                    <p className="text-[10px] opacity-80 leading-relaxed">
+                      1 Point = ₹1. <br/>
+                      Use points to buy tickets!
+                    </p>
                   </div>
                 </div>
               </div>
@@ -132,11 +165,91 @@ export default function ProfilePage() {
                     </p>
                   </div>
 
+                  {/* Interested Categories Section */}
+                  <div className="pt-4 border-t border-gray-100">
+                    <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Tag size={16} className="text-gray-400" />
+                      Interested Categories
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3 ml-1">
+                      Select categories you want to get notified about
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {AVAILABLE_CATEGORIES.map((cat) => {
+                        const isSelected = interestedCategories.includes(cat);
+                        return (
+                          <button
+                            type="button"
+                            key={cat}
+                            onClick={() => {
+                              setInterestedCategories((prev) =>
+                                isSelected
+                                  ? prev.filter((c) => c !== cat)
+                                  : [...prev, cat]
+                              );
+                            }}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                              isSelected
+                                ? "bg-brand-coral text-white border-brand-coral"
+                                : "bg-white text-gray-700 border-gray-200 hover:border-brand-coral hover:text-brand-coral"
+                            }`}
+                          >
+                            {cat}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Interested Locations Section */}
+                  <div className="pt-4 border-t border-gray-100">
+                    <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <MapPin size={16} className="text-gray-400" />
+                      Interested Locations
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3 ml-1">
+                      Select districts where you frequently attend events
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {AVAILABLE_LOCATIONS.map((loc) => {
+                        const isSelected = interestedLocations.includes(loc);
+                        return (
+                          <button
+                            type="button"
+                            key={loc}
+                            onClick={() => {
+                              setInterestedLocations((prev) =>
+                                isSelected
+                                  ? prev.filter((l) => l !== loc)
+                                  : [...prev, loc]
+                              );
+                            }}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                              isSelected
+                                ? "bg-brand-coral text-white border-brand-coral"
+                                : "bg-white text-gray-700 border-gray-200 hover:border-brand-coral hover:text-brand-coral"
+                            }`}
+                          >
+                            {loc}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div className="pt-4 border-t border-gray-100 flex justify-end">
                     <Button
                       variant="primary"
                       type="submit"
-                      disabled={isUpdating || fullName === user.fullName}
+                      disabled={
+                        isUpdating ||
+                        (!fullName.trim()) ||
+                        (fullName === (user.fullName || "") &&
+                          JSON.stringify(interestedCategories) ===
+                            JSON.stringify(user.interestedCategories || []) &&
+                          JSON.stringify(interestedLocations) ===
+                            JSON.stringify(user.interestedLocations || []))
+                      }
                       className="min-w-[140px]"
                       icon={<Save size={18} />}
                     >
