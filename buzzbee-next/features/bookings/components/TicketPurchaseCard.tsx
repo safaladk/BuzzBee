@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ShieldCheck, X, Wallet, Info } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -33,13 +33,25 @@ export function TicketPurchaseCard({
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsError, setTermsError] = useState(false);
   const [usePoints, setUsePoints] = useState(false);
+  const [pointsInput, setPointsInput] = useState(0);
 
   const subtotal = useMemo(() => price * qty, [price, qty]);
   const total = useMemo(() => subtotal + serviceFee, [subtotal, serviceFee]);
+  const maxPointsApplicable = useMemo(
+    () => Math.max(0, Math.floor(Math.min(total, userPointsBalance))),
+    [total, userPointsBalance],
+  );
 
-  const pointsToUse = usePoints ? Math.min(total, userPointsBalance) : 0;
+  const pointsToUse = usePoints
+    ? Math.min(pointsInput, maxPointsApplicable)
+    : 0;
   const remainingTotal = total - pointsToUse;
   const isFree = price === 0;
+
+  useEffect(() => {
+    if (!usePoints) return;
+    setPointsInput((prev) => Math.min(prev, maxPointsApplicable));
+  }, [maxPointsApplicable, usePoints]);
 
   return (
     <div className="rounded-2xl bg-white shadow-md p-6">
@@ -108,7 +120,17 @@ export function TicketPurchaseCard({
               <span className="text-sm font-black uppercase tracking-wider">Use BuzzBee Points</span>
             </div>
             <button
-              onClick={() => setUsePoints(!usePoints)}
+              onClick={() => {
+                setUsePoints((prev) => {
+                  const next = !prev;
+                  if (next) {
+                    setPointsInput(maxPointsApplicable);
+                  } else {
+                    setPointsInput(0);
+                  }
+                  return next;
+                });
+              }}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${usePoints ? 'bg-brand-coral' : 'bg-gray-200'}`}
             >
               <span
@@ -122,6 +144,43 @@ export function TicketPurchaseCard({
               <span className="text-brand-coral">Applying: -{pointsToUse.toLocaleString()}</span>
             )}
           </div>
+          {usePoints && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor="pointsToUse" className="text-[11px] font-bold uppercase tracking-wide text-slate-600">
+                  Points to spend
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setPointsInput(maxPointsApplicable)}
+                  className="text-[10px] font-black uppercase tracking-wide text-brand-coral hover:opacity-80"
+                >
+                  Use Max
+                </button>
+              </div>
+              <input
+                id="pointsToUse"
+                type="number"
+                min={0}
+                max={maxPointsApplicable}
+                value={pointsInput}
+                onChange={(e) => {
+                  const value = Number.parseInt(e.target.value || "0", 10);
+                  if (Number.isNaN(value)) {
+                    setPointsInput(0);
+                    return;
+                  }
+                  setPointsInput(
+                    Math.max(0, Math.min(value, maxPointsApplicable)),
+                  );
+                }}
+                className="w-full rounded-lg border border-brand-coral/20 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none ring-0 focus:border-brand-coral"
+              />
+              <p className="text-[10px] text-slate-500 font-medium">
+                Max usable now: {maxPointsApplicable.toLocaleString()} pts
+              </p>
+            </div>
+          )}
           {usePoints && (
             <div className="flex items-start gap-1.5 p-2 bg-white/60 rounded-lg border border-brand-coral/10">
               <Info size={12} className="text-brand-coral mt-0.5 shrink-0" />

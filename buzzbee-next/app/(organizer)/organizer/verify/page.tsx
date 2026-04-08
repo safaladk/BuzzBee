@@ -104,6 +104,7 @@ export default function VerificationPage() {
                     <Upload className="mx-auto text-gray-400 mb-3" size={40} />
                     <p className="text-gray-600 mb-4">Drag and drop your files here or click to browse</p>
                     <Button 
+                      align="center"
                       variant="outline" 
                       onClick={handleDocAdd}
                       className="cursor-pointer"

@@ -10,8 +10,6 @@ import { Event } from '../events/event.entity';
 import { User } from '../users/user.entity';
 import { Booking } from '../bookings/booking.entity';
 import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
-<<<<<<< Updated upstream
-=======
 import { CreateSponsorshipIntentDto } from './dto/create-sponsorship-intent.dto';
 
 const SPONSORSHIP_PLANS: Record<number, number> = {
@@ -19,7 +17,6 @@ const SPONSORSHIP_PLANS: Record<number, number> = {
   7: 1000, // 7 days for Rs 1000
   30: 3500, // 30 days for Rs 3500
 };
->>>>>>> Stashed changes
 
 @Injectable()
 export class PaymentsService {
@@ -83,16 +80,6 @@ export class PaymentsService {
     const serviceFee = Number(event.serviceFee || 0);
     const totalPrice = unitPrice * dto.quantity + serviceFee;
 
-<<<<<<< Updated upstream
-    if (totalPrice <= 0) {
-      throw new BadRequestException(
-        'This event does not require payment. Complete a free booking directly.',
-      );
-    }
-
-    const normalizedCurrency = (process.env.STRIPE_CURRENCY || 'inr').toLowerCase();
-    const amountInMinorUnit = Math.round(totalPrice * 100);
-=======
     let remainingToPay = totalPrice;
     if (dto.pointsUsed && dto.pointsUsed > 0) {
       if (user.pointsBalance < dto.pointsUsed) {
@@ -116,7 +103,6 @@ export class PaymentsService {
       process.env.STRIPE_CURRENCY || 'inr'
     ).toLowerCase();
     const amountInMinorUnit = Math.round(remainingToPay * 100);
->>>>>>> Stashed changes
 
     const stripe = this.getStripeClient();
 
@@ -128,10 +114,7 @@ export class PaymentsService {
         eventId: String(event.id),
         userId: String(user.id),
         quantity: String(dto.quantity),
-<<<<<<< Updated upstream
-=======
         pointsUsed: String(dto.pointsUsed || 0),
->>>>>>> Stashed changes
       },
     });
 
@@ -142,20 +125,12 @@ export class PaymentsService {
     return {
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-<<<<<<< Updated upstream
-      amount: totalPrice,
-      currency: normalizedCurrency,
-      eventId: event.id,
-      quantity: dto.quantity,
-      totalPrice,
-=======
       amount: remainingToPay,
       currency: normalizedCurrency,
       eventId: event.id,
       quantity: dto.quantity,
       totalPrice: totalPrice, // Original total
       pointsUsed: dto.pointsUsed || 0,
->>>>>>> Stashed changes
     };
   }
 
@@ -167,13 +142,7 @@ export class PaymentsService {
   }) {
     const stripe = this.getStripeClient();
 
-<<<<<<< Updated upstream
-    const intent = await stripe.paymentIntents.retrieve(
-      params.paymentIntentId,
-    );
-=======
     const intent = await stripe.paymentIntents.retrieve(params.paymentIntentId);
->>>>>>> Stashed changes
 
     if (intent.status !== 'succeeded') {
       throw new BadRequestException('Payment is not completed');
@@ -194,8 +163,6 @@ export class PaymentsService {
 
     return intent;
   }
-<<<<<<< Updated upstream
-=======
 
   async createSponsorshipIntent(user: User, dto: CreateSponsorshipIntentDto) {
     const event = await this.eventRepo.findOne({
@@ -300,5 +267,4 @@ export class PaymentsService {
 
     return this.eventRepo.save(event);
   }
->>>>>>> Stashed changes
 }

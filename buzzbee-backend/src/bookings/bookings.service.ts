@@ -10,11 +10,8 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { User } from '../users/user.entity';
 import { Event } from '../events/event.entity';
 import { PaymentsService } from '../payments/payments.service';
-<<<<<<< Updated upstream
-=======
 import { NotificationsService } from '../notifications/notifications.service';
 import { UsersService } from '../users/users.service';
->>>>>>> Stashed changes
 
 @Injectable()
 export class BookingsService {
@@ -24,11 +21,8 @@ export class BookingsService {
     @InjectRepository(Event)
     private eventRepo: Repository<Event>,
     private paymentsService: PaymentsService,
-<<<<<<< Updated upstream
-=======
     private notificationsService: NotificationsService,
     private usersService: UsersService,
->>>>>>> Stashed changes
   ) {}
 
   async create(user: User, dto: CreateBookingDto) {
@@ -69,12 +63,6 @@ export class BookingsService {
       throw new BadRequestException('Total price mismatch');
     }
 
-<<<<<<< Updated upstream
-    const isPaidBooking = computedTotalPrice > 0;
-    if (isPaidBooking) {
-      if (!dto.paymentIntentId) {
-        throw new BadRequestException('Payment intent is required for paid events');
-=======
     // Points logic
     let remainingToPayInCash = computedTotalPrice;
     if (dto.pointsUsed && dto.pointsUsed > 0) {
@@ -95,42 +83,30 @@ export class BookingsService {
         throw new BadRequestException(
           'Payment intent is required for paid events',
         );
->>>>>>> Stashed changes
       }
 
       const existingByIntent = await this.bookingRepo.findOne({
         where: { paymentIntentId: dto.paymentIntentId },
       });
       if (existingByIntent) {
-<<<<<<< Updated upstream
-        throw new BadRequestException('Payment has already been used for a booking');
-=======
         throw new BadRequestException(
           'Payment has already been used for a booking',
         );
->>>>>>> Stashed changes
       }
 
       await this.paymentsService.verifySucceededPaymentIntent({
         paymentIntentId: dto.paymentIntentId,
-<<<<<<< Updated upstream
-        expectedTotalPrice: computedTotalPrice,
-=======
         expectedTotalPrice: remainingToPayInCash,
->>>>>>> Stashed changes
         eventId: event.id,
         userId: user.id,
       });
     }
 
-<<<<<<< Updated upstream
-=======
     // Deduct points from user
     if (dto.pointsUsed && dto.pointsUsed > 0) {
       await this.usersService.updatePointsBalance(user.id, -dto.pointsUsed);
     }
 
->>>>>>> Stashed changes
     const booking = this.bookingRepo.create({
       user,
       event,

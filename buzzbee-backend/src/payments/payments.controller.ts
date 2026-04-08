@@ -3,14 +3,11 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
-<<<<<<< Updated upstream
-=======
 import { CreateSponsorshipIntentDto } from './dto/create-sponsorship-intent.dto';
 
 interface RequestWithUser {
   user: any;
 }
->>>>>>> Stashed changes
 
 @ApiTags('Payments')
 @ApiBearerAuth()
@@ -20,12 +17,6 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-intent')
-<<<<<<< Updated upstream
-  @ApiOperation({ summary: 'Create Stripe payment intent for booking checkout' })
-  createIntent(@Req() req, @Body() dto: CreatePaymentIntentDto) {
-    return this.paymentsService.createPaymentIntent(req.user, dto);
-  }
-=======
   @ApiOperation({
     summary: 'Create Stripe payment intent for booking checkout',
   })
@@ -61,5 +52,4 @@ export class PaymentsController {
 
     return verification;
   }
->>>>>>> Stashed changes
 }
