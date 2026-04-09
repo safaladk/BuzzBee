@@ -28,8 +28,14 @@ export class Booking {
   @Column({ default: 'confirmed' })
   status: string; // 'pending' | 'confirmed' | 'cancelled'
 
+  @Column({ type: 'varchar', nullable: true })
+  paymentIntentId: string | null;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   refundAmountPoints: number;
+
+  @Column({ type: 'text', nullable: true })
+  refundReason: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
   refundRequestedAt: Date;

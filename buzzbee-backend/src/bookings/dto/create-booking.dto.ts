@@ -5,17 +5,17 @@ export class CreateBookingDto {
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
-  eventId: number;
+  eventId!: number;
 
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
-  quantity: number;
+  quantity!: number;
 
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
-  totalPrice: number;
+  totalPrice!: number;
 
   @IsString()
   @IsOptional()
