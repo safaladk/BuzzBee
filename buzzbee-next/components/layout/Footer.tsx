@@ -38,7 +38,7 @@ export const Footer = () => {
               icon={null}
             >
               Cancel
-            </Button>
+              </Button>
             <Button
               variant="primary"
               onClick={() => {
@@ -63,7 +63,7 @@ export const Footer = () => {
                 </div>
                 <span className="font-bold text-xl text-white">BuzzBee</span>
               </div>
-              <p className="text-sm text-white opac ity-80 leading-relaxed">
+              <p className="text-sm text-white opacity-80 leading-relaxed">
                 Your trusted platform for discovering and booking amazing events
                 across Nepal.
               </p>
@@ -73,7 +73,7 @@ export const Footer = () => {
               <h3 className="font-semibold text-white mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="hover:text-accent transition-colors">
+                  <a href="/about" className="hover:text-accent transition-colors">
                     About Us
                   </a>
                 </li>
