@@ -10,15 +10,6 @@ import { Event } from '../events/event.entity';
 import { User } from '../users/user.entity';
 import { Booking } from '../bookings/booking.entity';
 import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
-import { CreateSponsorshipIntentDto } from './dto/create-sponsorship-intent.dto';
-
-const SPONSORSHIP_PLANS: Record<number, number> = {
-  3: 500, // 3 days for Rs 500
-  7: 1000, // 7 days for Rs 1000
-  30: 3500, // 30 days for Rs 3500
-};
-
-const MIN_CARD_PAYABLE_RS = Number(process.env.MIN_CARD_PAYABLE_RS || 50);
 
 @Injectable()
 export class PaymentsService {
@@ -82,35 +73,14 @@ export class PaymentsService {
     const serviceFee = Number(event.serviceFee || 0);
     const totalPrice = unitPrice * dto.quantity + serviceFee;
 
-    let remainingToPay = totalPrice;
-    if (dto.pointsUsed && dto.pointsUsed > 0) {
-      if (user.pointsBalance < dto.pointsUsed) {
-        throw new BadRequestException('Insufficient points balance');
-      }
-      if (dto.pointsUsed > totalPrice) {
-        throw new BadRequestException(
-          'Cannot use more points than total price',
-        );
-      }
-      remainingToPay = totalPrice - dto.pointsUsed;
-    }
-
-    if (remainingToPay <= 0) {
+    if (totalPrice <= 0) {
       throw new BadRequestException(
-        'No cash payment required. Please book using points directly.',
+        'This event does not require payment. Complete a free booking directly.',
       );
     }
 
-    if (remainingToPay < MIN_CARD_PAYABLE_RS) {
-      throw new BadRequestException(
-        `Minimum payable amount after points is Rs ${MIN_CARD_PAYABLE_RS.toFixed(2)}. Reduce points or increase ticket quantity.`,
-      );
-    }
-
-    const normalizedCurrency = (
-      process.env.STRIPE_CURRENCY || 'npr'
-    ).toLowerCase();
-    const amountInMinorUnit = Math.round(remainingToPay * 100);
+    const normalizedCurrency = (process.env.STRIPE_CURRENCY || 'inr').toLowerCase();
+    const amountInMinorUnit = Math.round(totalPrice * 100);
 
     const stripe = this.getStripeClient();
 
@@ -122,7 +92,6 @@ export class PaymentsService {
         eventId: String(event.id),
         userId: String(user.id),
         quantity: String(dto.quantity),
-        pointsUsed: String(dto.pointsUsed || 0),
       },
     });
 
@@ -133,12 +102,11 @@ export class PaymentsService {
     return {
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-      amount: remainingToPay,
+      amount: totalPrice,
       currency: normalizedCurrency,
       eventId: event.id,
       quantity: dto.quantity,
-      totalPrice: totalPrice, // Original total
-      pointsUsed: dto.pointsUsed || 0,
+      totalPrice,
     };
   }
 
@@ -150,7 +118,9 @@ export class PaymentsService {
   }) {
     const stripe = this.getStripeClient();
 
-    const intent = await stripe.paymentIntents.retrieve(params.paymentIntentId);
+    const intent = await stripe.paymentIntents.retrieve(
+      params.paymentIntentId,
+    );
 
     if (intent.status !== 'succeeded') {
       throw new BadRequestException('Payment is not completed');
@@ -170,109 +140,5 @@ export class PaymentsService {
     }
 
     return intent;
-  }
-
-  async createSponsorshipIntent(user: User, dto: CreateSponsorshipIntentDto) {
-    const event = await this.eventRepo.findOne({
-      where: { id: dto.eventId, organizer: { id: user.id } },
-    });
-    if (!event) {
-      throw new NotFoundException('Event not found or unauthorized');
-    }
-
-    if (!user.isVerified) {
-      throw new BadRequestException(
-        'Only verified organizers can boost events',
-      );
-    }
-
-    if (event.status !== 'APPROVED') {
-      throw new BadRequestException(
-        'Only verified (approved) events can be boosted',
-      );
-    }
-
-    const price = SPONSORSHIP_PLANS[dto.days];
-    if (!price) {
-      throw new BadRequestException('Invalid sponsorship plan selected');
-    }
-
-    const normalizedCurrency = (
-      process.env.STRIPE_CURRENCY || 'npr'
-    ).toLowerCase();
-    const amountInMinorUnit = Math.round(price * 100);
-
-    const stripe = this.getStripeClient();
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInMinorUnit,
-      currency: normalizedCurrency,
-      automatic_payment_methods: { enabled: true },
-      metadata: {
-        type: 'SPONSORSHIP',
-        eventId: String(event.id),
-        userId: String(user.id),
-        days: String(dto.days),
-      },
-    });
-
-    if (!paymentIntent.client_secret) {
-      throw new BadRequestException('Unable to create payment session');
-    }
-
-    return {
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
-      amount: price,
-      currency: normalizedCurrency,
-      eventId: event.id,
-      days: dto.days,
-    };
-  }
-
-  async verifySucceededSponsorshipIntent(params: {
-    paymentIntentId: string;
-    eventId: number;
-    userId: number;
-  }) {
-    const stripe = this.getStripeClient();
-    const intent = await stripe.paymentIntents.retrieve(params.paymentIntentId);
-
-    if (intent.status !== 'succeeded') {
-      throw new BadRequestException('Payment is not completed');
-    }
-
-    if (intent.metadata?.type !== 'SPONSORSHIP') {
-      throw new BadRequestException('Not a sponsorship payment');
-    }
-
-    if (Number(intent.metadata?.eventId) !== params.eventId) {
-      throw new BadRequestException('Payment event mismatch');
-    }
-
-    if (Number(intent.metadata?.userId) !== params.userId) {
-      throw new BadRequestException('Payment owner mismatch');
-    }
-
-    return {
-      success: true,
-      days: Number(intent.metadata.days),
-    };
-  }
-
-  async autoBoostEvent(id: number, days: number) {
-    const event = await this.eventRepo.findOne({ where: { id } });
-    if (!event) throw new NotFoundException('Event not found');
-
-    const now = new Date();
-    const expiry = new Date();
-    expiry.setDate(now.getDate() + days);
-
-    event.isSponsored = true;
-    event.sponsorshipStatus = 'APPROVED';
-    event.sponsoredAt = now;
-    event.sponsoredUntil = expiry;
-
-    return this.eventRepo.save(event);
   }
 }
