@@ -1,5 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, Compass, Sparkles, Ticket, Users } from "lucide-react";
+import aboutUsIllustration from "@/public/assets/aboutus-illustration.png";
+import categoriesIllustration from "@/public/assets/categories-illustration.png";
 
 const pillars = [
   {
@@ -45,18 +48,69 @@ const operations = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <section className="relative overflow-hidden bg-brand-navy text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(247,185,128,0.28),transparent_45%)]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/70">About BuzzBee</p>
-          <h1 className="mt-4 font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight max-w-3xl">
-            Helping people find experiences that feel worth showing up for.
-          </h1>
-          <p className="mt-6 text-base sm:text-lg text-white/80 max-w-2xl leading-relaxed">
-            BuzzBee is a modern event discovery platform for people who want less noise,
-            better recommendations, and a smoother way to explore what is happening around them.
-          </p>
+    <div className=" bg-slate-50 text-slate-900">
+      <section className="relative overflow-hidden bg-white text-slate-900 min-h-screen">
+        <div className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-brand-coral font-semibold">About BuzzBee</p>
+            <h1 className="mt-4 font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl max-w-3xl">
+              We'll help you find events curated to your interests.
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+              BuzzBee is a modern event discovery platform for people who want less noise,
+              better recommendations, and a smoother way to explore what is happening around them.
+            </p>
+          </div>
+
+          <div className="group relative mx-auto w-full max-w-xl">
+            <div className="absolute inset-0 rounded-4xl bg-[radial-gradient(circle_at_20%_20%,rgba(247,185,128,0.25),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(15,23,42,0.06),transparent_40%)] blur-2xl" />
+            <div className="relative overflow-hidden rounded-4xl border border-slate-200 bg-slate-50 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.18)] transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_34px_70px_-30px_rgba(15,23,42,0.28)]">
+              <Image
+                src={aboutUsIllustration}
+                alt="BuzzBee community moments"
+                width={960}
+                height={960}
+                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                priority
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-navy/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            </div>
+
+            <div className="mt-4 grid max-h-80 grid-cols-1 gap-3 overflow-hidden transition-all duration-500 ease-out sm:grid-cols-3 md:max-h-0 md:group-hover:max-h-80">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white opacity-100 transition-all duration-500 ease-out md:translate-y-3 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                <Image
+                  src={aboutUsIllustration}
+                  alt="People connecting through events"
+                  width={480}
+                  height={320}
+                  className="h-28 w-full object-cover"
+                />
+                <p className="px-3 py-2 text-xs font-medium text-slate-600">Community-first events</p>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white opacity-100 transition-all duration-500 ease-out md:translate-y-3 md:opacity-0 md:delay-100 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                <Image
+                  src={categoriesIllustration}
+                  alt="Curated event categories"
+                  width={480}
+                  height={320}
+                  className="h-28 w-full object-cover"
+                />
+                <p className="px-3 py-2 text-xs font-medium text-slate-600">Smart discovery by category</p>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white opacity-100 transition-all duration-500 ease-out md:translate-y-3 md:opacity-0 md:delay-200 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                <Image
+                  src="/globe.svg"
+                  alt="Local and global event reach"
+                  width={480}
+                  height={320}
+                  className="h-28 w-full bg-slate-50 p-6 object-contain"
+                />
+                <p className="px-3 py-2 text-xs font-medium text-slate-600">Built for local buzz</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

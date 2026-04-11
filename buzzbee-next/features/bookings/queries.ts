@@ -19,3 +19,16 @@ export const useMyBookings = () => {
     queryFn: bookingService.getMyBookings,
   });
 };
+
+export const useRequestRefund = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+      bookingService.requestRefund(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+};

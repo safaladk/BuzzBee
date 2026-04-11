@@ -18,6 +18,8 @@ const SPONSORSHIP_PLANS: Record<number, number> = {
   30: 3500, // 30 days for Rs 3500
 };
 
+const MIN_CARD_PAYABLE_RS = Number(process.env.MIN_CARD_PAYABLE_RS || 50);
+
 @Injectable()
 export class PaymentsService {
   private stripe: Stripe | null;
@@ -99,8 +101,14 @@ export class PaymentsService {
       );
     }
 
+    if (remainingToPay < MIN_CARD_PAYABLE_RS) {
+      throw new BadRequestException(
+        `Minimum payable amount after points is Rs ${MIN_CARD_PAYABLE_RS.toFixed(2)}. Reduce points or increase ticket quantity.`,
+      );
+    }
+
     const normalizedCurrency = (
-      process.env.STRIPE_CURRENCY || 'inr'
+      process.env.STRIPE_CURRENCY || 'npr'
     ).toLowerCase();
     const amountInMinorUnit = Math.round(remainingToPay * 100);
 
@@ -190,7 +198,7 @@ export class PaymentsService {
     }
 
     const normalizedCurrency = (
-      process.env.STRIPE_CURRENCY || 'inr'
+      process.env.STRIPE_CURRENCY || 'npr'
     ).toLowerCase();
     const amountInMinorUnit = Math.round(price * 100);
 

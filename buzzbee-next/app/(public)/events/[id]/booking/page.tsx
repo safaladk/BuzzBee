@@ -97,7 +97,7 @@ function CardPaymentPanel({
     <div className="rounded-2xl bg-white p-5 shadow-md border border-gray-100 space-y-4">
       <h3 className="text-base font-bold text-gray-900">Pay with Card</h3>
       <p className="text-sm text-gray-600">
-        Amount: <span className="font-semibold text-gray-900">{checkoutSession.currency.toUpperCase()} {checkoutSession.totalPrice.toFixed(2)}</span>
+        Amount: <span className="font-semibold text-gray-900">Rs {checkoutSession.totalPrice.toFixed(2)}</span>
       </p>
 
       <div className="rounded-xl border border-gray-200 p-3 bg-gray-50">
