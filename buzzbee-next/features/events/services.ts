@@ -3,8 +3,6 @@ import { Event, CreateEventPayload } from '@/lib/types';
 
 export const eventService = {
   getAll: () => get<Event[]>('/events'),
-
-  getSponsored: () => get<Event[]>('/events/sponsored'),
   
   getById: (id: string) => get<Event>(`/events/${id}`),
   

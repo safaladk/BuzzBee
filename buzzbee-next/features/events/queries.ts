@@ -10,13 +10,6 @@ export const useEvents = () => {
   });
 };
 
-export const useSponsoredEvents = () => {
-  return useQuery({
-    queryKey: ['events', 'sponsored'],
-    queryFn: eventService.getSponsored,
-  });
-};
-
 export const useEvent = (id: string) => {
   const queryClient = useQueryClient();
 

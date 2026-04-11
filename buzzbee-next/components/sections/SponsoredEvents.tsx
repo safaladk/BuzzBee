@@ -1,15 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSponsoredEvents } from "@/features/events/queries";
+import { useEvents } from "@/features/events/queries";
 import { Calendar, MapPin, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
 export function SponsoredEvents() {
-  const { data: sponsoredEvents = [], isLoading } = useSponsoredEvents();
+  const { data: allEvents, isLoading } = useEvents();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const sponsoredEvents = allEvents
+    ? allEvents.filter(
+        (e) =>
+          e.isSponsored && new Date(e.date).getTime() >= new Date().getTime(),
+      )
+    : [];
 
   useEffect(() => {
     if (sponsoredEvents.length <= 1) return;
@@ -24,7 +30,7 @@ export function SponsoredEvents() {
   const activeEvent = sponsoredEvents[currentIndex];
 
   return (
-    <section className="py-16 bg-linear-to-b from-gray-50 to-white relative overflow-hidden">
+    <section className="py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex flex-col items-center text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-bold mb-3">

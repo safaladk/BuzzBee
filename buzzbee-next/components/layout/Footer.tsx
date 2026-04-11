@@ -1,16 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/app/providers/auth-provider";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
 export const Footer = () => {
+  const pathname = usePathname();
   const { user } = useAuth();
   const router = useRouter();
   const [showOrganizerModal, setShowOrganizerModal] = useState(false);
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   const handleCreateEventClick = (e: React.MouseEvent) => {
     if (user?.role !== "organizer") {
@@ -38,7 +43,7 @@ export const Footer = () => {
               icon={null}
             >
               Cancel
-              </Button>
+            </Button>
             <Button
               variant="primary"
               onClick={() => {
@@ -63,7 +68,7 @@ export const Footer = () => {
                 </div>
                 <span className="font-bold text-xl text-white">BuzzBee</span>
               </div>
-              <p className="text-sm text-white opacity-80 leading-relaxed">
+              <p className="text-sm text-white opac ity-80 leading-relaxed">
                 Your trusted platform for discovering and booking amazing events
                 across Nepal.
               </p>
@@ -73,7 +78,7 @@ export const Footer = () => {
               <h3 className="font-semibold text-white mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="/about" className="hover:text-accent transition-colors">
+                  <a href="#" className="hover:text-accent transition-colors">
                     About Us
                   </a>
                 </li>
