@@ -4,6 +4,7 @@ import { Hero } from "@/components/sections/Hero";
 import { StatsSection } from "@/components/sections/StatsSection";
 import { stats as fallbackStats } from "@/lib/constants";
 import { EventsAroundDate } from "@/components/sections/EventsAroundDate";
+import { SponsoredEvents } from "@/components/sections/SponsoredEvents";
 import { useStats } from "@/features/stats/queries";
 import { Calendar, MapPin, Trophy } from "lucide-react";
 
@@ -39,6 +40,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gray-50">
       <Hero />
       <StatsSection stats={displayStats} />
+      <SponsoredEvents />
       <EventsAroundDate />
     </div>
   );

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
 import { use, useMemo } from "react";
-import { Calendar, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Calendar, MapPin, User, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useEvent } from "@/features/events/queries";
 import { TicketPurchaseCard } from "@/features/bookings/components/TicketPurchaseCard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -115,6 +115,12 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             <MapPin size={20} className="text-brand-coral" />
             <span className="font-medium">{event.location}</span>
           </span>
+          <span className="inline-flex items-center gap-2">
+            <User size={20} className="text-brand-coral" />
+            <span className="font-medium">
+              Organized by {event.organizer?.fullName || "BuzzBee Host"}
+            </span>
+          </span>
         </div>
 
         {/* Content + Sidebar */}
@@ -129,7 +135,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               <p className="text-gray-700 leading-relaxed">
                 {event.description ||
                   `Enjoy community, culture, and creativity at ${event.title}.`}
-                {event.organizer ? ` Organized by ${event.organizer}.` : ""}
+                  {event.organizer?.fullName
+                    ? ` Organized by ${event.organizer.fullName}.`
+                    : ""}
               </p>
             </div>
 
@@ -175,7 +183,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 <div className="flex flex-col">
                   <span className="text-sm text-gray-500 mb-1">Organizer</span>
                   <span className="font-semibold text-gray-900">
-                    {event.organizer || "BuzzBee Host"}
+                    {event.organizer?.fullName || "BuzzBee Host"}
                   </span>
                 </div>
                 <div className="flex flex-col">

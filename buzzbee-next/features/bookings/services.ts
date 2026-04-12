@@ -6,6 +6,7 @@ export interface BookingPayload {
   quantity: number;
   totalPrice: number;
   paymentIntentId?: string;
+  pointsUsed?: number;
 }
 
 export const bookingService = {

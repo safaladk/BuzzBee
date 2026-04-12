@@ -82,7 +82,7 @@ export const Navbar = () => {
               </span>
             </Link>
             <Link
-              href="#"
+              href="/categories"
               className="group relative text-gray-700 hover:text-brand-coral font-medium transition-colors"
             >
               <span className="relative">
@@ -91,7 +91,7 @@ export const Navbar = () => {
               </span>
             </Link>
             <Link
-              href="#"
+              href="/about"
               className="group relative text-gray-700 hover:text-brand-coral font-medium transition-colors"
             >
               <span className="relative">
@@ -280,7 +280,7 @@ export const Navbar = () => {
               </span>
             </Link>
             <Link
-              href="#"
+              href="/categories"
               className="group block text-gray-700 hover:text-brand-coral font-medium py-2"
             >
               <span className="relative inline-block">
@@ -289,7 +289,7 @@ export const Navbar = () => {
               </span>
             </Link>
             <Link
-              href="#"
+              href="/about"
               className="group block text-gray-700 hover:text-brand-coral font-medium py-2"
             >
               <span className="relative inline-block">
