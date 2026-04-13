@@ -1,5 +1,6 @@
 "use client";
 
+import { MouseEvent } from "react";
 import { Heart, Star, MapPin, Calendar, Users, Ticket } from "lucide-react";
 import type { Event } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
@@ -26,7 +27,10 @@ export const EventCard = ({ event, onBookmark }: EventCardProps) => {
 
   const isBookmarked = favorites?.some((fav: { event: { id: string | number } }) => String(fav.event.id) === String(event.id)) ?? false;
 
-  const handleBookmark = () => {
+  const handleBookmark = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!user) {
       router.push("/login");
       return;
@@ -62,6 +66,7 @@ export const EventCard = ({ event, onBookmark }: EventCardProps) => {
           )}
         </div>
         <button
+          type="button"
           onClick={handleBookmark}
           className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform"
         >

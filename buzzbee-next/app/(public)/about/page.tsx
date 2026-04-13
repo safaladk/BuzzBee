@@ -186,12 +186,6 @@ export default function AboutPage() {
               >
                 Register as organizer
               </Link>
-              <Link
-                href="/organizer/dashboard"
-                className="inline-flex rounded-lg bg-brand-coral px-4 py-2 text-sm font-semibold text-white hover:bg-brand-peach transition-colors"
-              >
-                Open organizer dashboard
-              </Link>
             </div>
           </article>
         </section>

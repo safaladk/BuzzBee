@@ -85,3 +85,10 @@ export interface Booking {
   refundReason?: string;
   createdAt: string;
 }
+
+export interface Notification {
+  id: number;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}

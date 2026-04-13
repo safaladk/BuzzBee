@@ -26,7 +26,7 @@ export const CategoryFilter = ({
                 onClick={() => onSelectCategory(category.name)}
                 className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold whitespace-nowrap transition-all duration-200 ${
                   isSelected
-                    ? "bg-gradient-to-r from-brand-navy to-brand-coral text-white shadow-lg scale-105"
+                    ? "bg-linear-to-r from-brand-navy to-brand-coral text-white shadow-lg scale-105"
                     : "bg-gray-100 text-gray-700 hover:bg-brand-navy/5"
                 }`}
               >

@@ -85,9 +85,7 @@ export default function CategoriesPage() {
                 Categories
               </p>
               <h1 className="mt-4 font-serif text-5xl sm:text-6xl lg:text-7xl leading-[1.08] text-slate-900">
-                Explore by
-                <br />
-                <em className="text-brand-navy">interest</em>
+                Explore by your intereset
               </h1>
               <p className="mt-6 text-slate-600 text-lg leading-relaxed max-w-md">
                 Start with what you love. Pick a category and discover upcoming
