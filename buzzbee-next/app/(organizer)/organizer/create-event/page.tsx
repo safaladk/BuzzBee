@@ -1,20 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
-import {
-  Calendar,
-  MapPin,
-  DollarSign,
-  Image as ImageIcon,
-  Tag,
-  Upload,
-  X,
-} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCreateEvent, useUpdateEvent } from "@/features/events/queries";
 import { useSearchParams, useRouter } from "next/navigation";
 import { eventService } from "@/features/events/services";
 import { CreateEventPayload } from "@/lib/types";
+import { EventBasicInfo } from "@/features/events/components/create-event/EventBasicInfo";
+import { EventLogistics } from "@/features/events/components/create-event/EventLogistics";
+import { EventTicketing } from "@/features/events/components/create-event/EventTicketing";
+import { EventImageUpload } from "@/features/events/components/create-event/EventImageUpload";
+import { EventFormActions } from "@/features/events/components/create-event/EventFormActions";
 
 function CreateEventContent() {
   const {
@@ -276,349 +272,37 @@ function CreateEventContent() {
                 </p>
               </div>
             )}
-            {/* Event Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Event Title
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="e.g., Summer Music Festival 2025"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                required
-              />
-            </div>
 
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Describe your event in detail..."
-                rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                required
-              />
-            </div>
+            <EventBasicInfo formData={formData} onChange={handleChange} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Date */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <Calendar size={18} />
-                  Date
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                  required
-                />
-              </div>
+            <EventLogistics formData={formData} onChange={handleChange} />
 
-              {/* Time */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time
-                </label>
-                <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                  required
-                />
-              </div>
+            <EventTicketing formData={formData} onChange={handleChange} />
 
-              {/* Category */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <Tag size={18} />
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                  required
-                >
-                  <option value="Music">Music</option>
-                  <option value="Art">Art</option>
-                  <option value="Food">Food</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Wellness">Wellness</option>
-                </select>
-              </div>
+            <EventImageUpload
+              formData={formData}
+              imageMode={imageMode}
+              imagePreview={imagePreview}
+              fileInputRef={fileInputRef}
+              onChange={handleChange}
+              onFileSelect={handleFileSelect}
+              onClearImage={clearImage}
+              onSetImageMode={setImageMode}
+            />
 
-              {/* Price */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <DollarSign size={18} />
-                  Price (Rs.)
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  min="0"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={handleChange}
-                  placeholder="0 for free event"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                />
-              </div>
-              {/* Capacity */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <Tag size={18} />
-                  Total Tickets
-                </label>
-                <input
-                  type="number"
-                  name="capacity"
-                  min="1"
-                  value={formData.capacity}
-                  onChange={handleChange}
-                  placeholder="e.g., 500"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                />
-              </div>
-
-              {/* Service Fee */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <DollarSign size={18} />
-                  Service Fee (Rs.)
-                </label>
-                <input
-                  type="number"
-                  name="serviceFee"
-                  min="0"
-                  step="0.01"
-                  value={formData.serviceFee}
-                  onChange={handleChange}
-                  placeholder="e.g., 25"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                />
-              </div>
-
-              {/* Max Tickets Per User */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <Tag size={18} />
-                  Max Tickets Per User
-                </label>
-                <input
-                  type="number"
-                  name="maxTicketsPerUser"
-                  min="0"
-                  value={formData.maxTicketsPerUser}
-                  onChange={handleChange}
-                  placeholder="0 for unlimited"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                />
-              </div>
-
-              {/* Highlights */}
-              <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700 mb-2">
-                  Event Highlights (comma separated)
-                </label>
-                <input
-                  type="text"
-                  name="highlights"
-                  value={formData.highlights}
-                  onChange={handleChange}
-                  placeholder="Live Music, Food Stalls, Cultural Dance"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Location */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <MapPin size={18} />
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  placeholder="e.g., Thamel, Kathmandu"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                  required
-                />
-              </div>
-
-              {/* District */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  District
-                </label>
-                <select
-                  name="district"
-                  value={formData.district}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                  required
-                >
-                  <option value="">Select a district</option>
-                  <option value="Kathmandu">Kathmandu</option>
-                  <option value="Lalitpur">Lalitpur</option>
-                  <option value="Bhaktapur">Bhaktapur</option>
-                  <option value="Pokhara">Pokhara</option>
-                  <option value="Biratnagar">Biratnagar</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Image Upload */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                <ImageIcon size={18} />
-                Event Image
-              </label>
-
-              {/* Mode Toggle */}
-              <div className="flex gap-2 mb-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setImageMode("url");
-                    clearImage();
-                  }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    imageMode === "url"
-                      ? "bg-amber-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  URL
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setImageMode("file");
-                    setFormData((prev) => ({ ...prev, image: "" }));
-                  }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    imageMode === "file"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  Upload
-                </button>
-              </div>
-
-              {/* URL Input */}
-              {imageMode === "url" && (
-                <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleChange}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
-                />
-              )}
-
-              {/* File Upload */}
-              {imageMode === "file" && (
-                <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-600 hover:bg-indigo-50 transition flex flex-col items-center gap-2"
-                  >
-                    <Upload size={24} />
-                    <span className="text-sm font-medium">
-                      Click to upload or drag and drop
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      PNG, JPG, GIF up to 5MB
-                    </span>
-                  </button>
-
-                  {/* Image Preview */}
-                  {imagePreview && (
-                    <div className="mt-4 relative">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={clearImage}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
-              <Button
-                variant="ghost"
-                className="flex-1"
-                onClick={() => handleSubmit(false)}
-                icon={null}
-                type="button"
-                disabled={isPending}
-              >
-                Save as Draft
-              </Button>
-              <Button
-                variant="primary"
-                size="lg"
-                className="flex-1"
-                icon={null}
-                type="button"
-                onClick={() => handleSubmit(true)}
-                disabled={isPending}
-              >
-                {isPending
-                  ? isEditing
-                    ? "Updating..."
-                    : "Publishing..."
-                  : isEditing
-                    ? "Update Event"
-                    : "Publish Event"}
-              </Button>
-            </div>
+            <EventFormActions
+              isPending={isPending}
+              isEditing={isEditing}
+              onSaveDraft={() => handleSubmit(false)}
+              onPublish={() => handleSubmit(true)}
+            />
           </form>
         </div>
       </div>
     </div>
   );
 }
+
 
 export default function CreateEventPage() {
   return (
