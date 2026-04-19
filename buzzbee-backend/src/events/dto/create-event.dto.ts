@@ -56,4 +56,7 @@ export class CreateEventDto {
   @Min(0)
   @Type(() => Number)
   maxTicketsPerUser?: number;
+
+  @IsOptional()
+  ticketTiers?: { name: string; price: number; capacity: number }[];
 }

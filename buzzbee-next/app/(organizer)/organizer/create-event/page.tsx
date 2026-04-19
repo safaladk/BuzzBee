@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { useCreateEvent, useUpdateEvent } from "@/features/events/queries";
 import { useSearchParams, useRouter } from "next/navigation";
 import { eventService } from "@/features/events/services";
-import { CreateEventPayload } from "@/lib/types";
+import { CreateEventPayload, TicketTier } from "@/lib/types";
 import { EventBasicInfo } from "@/features/events/components/create-event/EventBasicInfo";
 import { EventLogistics } from "@/features/events/components/create-event/EventLogistics";
 import { EventTicketing } from "@/features/events/components/create-event/EventTicketing";
@@ -41,7 +41,21 @@ function CreateEventContent() {
     serviceFee: 0,
     maxTicketsPerUser: 0,
     highlights: "",
+    ticketTiers: [],
   });
+
+  const handleUpdateTiers = (tiers: TicketTier[]) => {
+    setFormData((prev) => {
+      const newPrice = tiers.length > 0 ? Math.min(...tiers.map((t) => t.price)) : prev.price;
+      const newCapacity = tiers.length > 0 ? tiers.reduce((acc, t) => acc + t.capacity, 0) : prev.capacity;
+      return {
+        ...prev,
+        ticketTiers: tiers,
+        price: newPrice,
+        capacity: newCapacity,
+      };
+    });
+  };
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -133,6 +147,7 @@ function CreateEventContent() {
           serviceFee: Number(data.serviceFee) || 0,
           maxTicketsPerUser: Number(data.maxTicketsPerUser) || 0,
           highlights: data.highlights || "",
+          ticketTiers: data.ticketTiers || [],
         }));
 
         if (data.image) {
@@ -277,7 +292,11 @@ function CreateEventContent() {
 
             <EventLogistics formData={formData} onChange={handleChange} />
 
-            <EventTicketing formData={formData} onChange={handleChange} />
+            <EventTicketing
+              formData={formData}
+              onChange={handleChange}
+              onUpdateTiers={handleUpdateTiers}
+            />
 
             <EventImageUpload
               formData={formData}

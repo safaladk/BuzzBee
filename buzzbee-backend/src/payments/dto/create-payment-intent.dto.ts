@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePaymentIntentDto {
   @IsNumber()
@@ -16,4 +16,8 @@ export class CreatePaymentIntentDto {
   @IsNumber()
   @Type(() => Number)
   pointsUsed?: number;
+
+  @IsOptional()
+  @IsString()
+  tierName?: string;
 }

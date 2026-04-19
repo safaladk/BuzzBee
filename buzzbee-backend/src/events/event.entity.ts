@@ -45,6 +45,9 @@ export class Event {
   @Column({ type: 'text', nullable: true })
   highlights: string;
 
+  @Column({ type: 'jsonb', nullable: true })
+  ticketTiers: { name: string; price: number; capacity: number }[];
+
   @Column({ type: 'int', default: 0 })
   attendees: number;
 

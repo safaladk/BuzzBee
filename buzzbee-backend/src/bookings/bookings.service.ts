@@ -55,7 +55,14 @@ export class BookingsService {
       }
     }
 
-    const unitPrice = Number(event.price || 0);
+    let unitPrice = Number(event.price || 0);
+    if (dto.tierName && event.ticketTiers && event.ticketTiers.length > 0) {
+      const selectedTier = event.ticketTiers.find((t) => t.name === dto.tierName);
+      if (!selectedTier) {
+        throw new BadRequestException('Invalid ticket tier selected');
+      }
+      unitPrice = Number(selectedTier.price || 0);
+    }
     const serviceFee = Number(event.serviceFee || 0);
     const computedTotalPrice = unitPrice * dto.quantity + serviceFee;
 
@@ -113,6 +120,7 @@ export class BookingsService {
       quantity: dto.quantity,
       totalPrice: computedTotalPrice,
       paymentIntentId: dto.paymentIntentId ?? null,
+      tierName: dto.tierName ?? null,
       status: 'confirmed',
     });
 

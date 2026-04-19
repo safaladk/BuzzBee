@@ -190,14 +190,20 @@ export default function EventBookingPage({ params }: PayloadProps) {
   async function handleBook({
     qty,
     pointsUsed,
+    tierName,
   }: {
     qty: number;
     pointsUsed: number;
+    tierName?: string;
   }) {
     setCheckoutError(null);
-    const price = Number(event?.price || 0);
+    // Find the correct base price
+    const basePrice = tierName && event?.ticketTiers?.length
+      ? event.ticketTiers.find((t: any) => t.name === tierName)?.price || 0
+      : Number(event?.price || 0);
+
     const serviceFee = Number(event?.serviceFee || 0);
-    const totalPrice = price * qty + serviceFee;
+    const totalPrice = basePrice * qty + serviceFee;
     const remainingToPay = totalPrice - pointsUsed;
 
     if (remainingToPay <= 0) {
@@ -207,6 +213,7 @@ export default function EventBookingPage({ params }: PayloadProps) {
           quantity: qty,
           totalPrice,
           pointsUsed: pointsUsed,
+          ...(tierName ? { tierName } : {}),
         });
         setConfirmed(true);
       } catch (err: any) {
@@ -227,6 +234,7 @@ export default function EventBookingPage({ params }: PayloadProps) {
         eventId: Number(event?.id),
         quantity: qty,
         pointsUsed: pointsUsed,
+        ...(tierName ? { tierName } : {}),
       });
       setCheckoutSession(session);
     } catch (err: any) {
@@ -366,6 +374,7 @@ export default function EventBookingPage({ params }: PayloadProps) {
                 maxTicketsPerUser={event.maxTicketsPerUser}
                 onBook={handleBook}
                 userPointsBalance={user?.pointsBalance || 0}
+                ticketTiers={event.ticketTiers}
               />
 
               {checkoutSession && stripePromise && (

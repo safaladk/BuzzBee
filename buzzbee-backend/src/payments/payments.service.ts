@@ -78,7 +78,14 @@ export class PaymentsService {
       }
     }
 
-    const unitPrice = Number(event.price || 0);
+    let unitPrice = Number(event.price || 0);
+    if (dto.tierName && event.ticketTiers && event.ticketTiers.length > 0) {
+      const selectedTier = event.ticketTiers.find((t) => t.name === dto.tierName);
+      if (!selectedTier) {
+        throw new BadRequestException('Invalid ticket tier selected');
+      }
+      unitPrice = Number(selectedTier.price || 0);
+    }
     const serviceFee = Number(event.serviceFee || 0);
     const totalPrice = unitPrice * dto.quantity + serviceFee;
 
@@ -123,6 +130,7 @@ export class PaymentsService {
         userId: String(user.id),
         quantity: String(dto.quantity),
         pointsUsed: String(dto.pointsUsed || 0),
+        tierName: dto.tierName || '',
       },
     });
 
@@ -139,6 +147,7 @@ export class PaymentsService {
       quantity: dto.quantity,
       totalPrice: totalPrice, // Original total
       pointsUsed: dto.pointsUsed || 0,
+      tierName: dto.tierName,
     };
   }
 

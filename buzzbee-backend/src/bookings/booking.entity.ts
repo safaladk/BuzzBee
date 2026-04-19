@@ -31,6 +31,9 @@ export class Booking {
   @Column({ type: 'varchar', nullable: true })
   paymentIntentId: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  tierName: string | null;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   refundAmountPoints: number;
 

@@ -226,6 +226,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                   "Instant confirmation",
                   "Cancellation available 24h before the event",
                 ]}
+                ticketTiers={event.ticketTiers}
               />
             </div>
           </div>

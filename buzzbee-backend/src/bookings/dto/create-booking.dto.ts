@@ -21,6 +21,10 @@ export class CreateBookingDto {
   @IsOptional()
   paymentIntentId?: string;
 
+  @IsString()
+  @IsOptional()
+  tierName?: string;
+
   @IsOptional()
   @IsNumber()
   @Type(() => Number)

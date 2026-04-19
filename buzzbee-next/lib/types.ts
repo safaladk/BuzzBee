@@ -24,6 +24,7 @@ export interface Event {
   highlights?: string;
   isSponsored?: boolean;
   sponsorshipStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
+  ticketTiers?: TicketTier[];
 }
 
 export interface User {
@@ -50,6 +51,12 @@ export interface Stat {
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
+export interface TicketTier {
+  name: string;
+  price: number;
+  capacity: number;
+}
+
 export interface CreateEventPayload {
   title: string;
   description: string;
@@ -65,6 +72,7 @@ export interface CreateEventPayload {
   maxTicketsPerUser?: number;
   highlights?: string;
   isPublished?: boolean;
+  ticketTiers?: TicketTier[];
 }
 
 export interface PlatformStats {

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ShieldCheck, X, Wallet, Info } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { TicketTier } from "@/lib/types";
 
 interface Props {
   price: number;
@@ -14,10 +15,11 @@ interface Props {
   stats?: string[];
   maxTicketsPerUser?: number;
   userPointsBalance?: number;
+  ticketTiers?: TicketTier[];
 }
 
 export function TicketPurchaseCard({
-  price,
+  price: basePrice,
   currency = "Rs.",
   serviceFee = 25,
   onBook,
@@ -26,7 +28,17 @@ export function TicketPurchaseCard({
   stats = [],
   maxTicketsPerUser,
   userPointsBalance = 0,
+  ticketTiers = [],
 }: Props) {
+  const hasTiers = ticketTiers && ticketTiers.length > 0;
+  const [selectedTier, setSelectedTier] = useState<string>(
+    hasTiers ? ticketTiers[0].name : ""
+  );
+
+  const price = hasTiers
+    ? ticketTiers.find((t) => t.name === selectedTier)?.price || basePrice
+    : basePrice;
+
   const [qty, setQty] = useState(1);
   const [limitMessage, setLimitMessage] = useState<string | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -63,6 +75,39 @@ export function TicketPurchaseCard({
       </div>
 
       <p className="text-sm text-gray-500 mt-1">All fees included</p>
+
+      {hasTiers && (
+        <div className="mt-5">
+          <p className="font-semibold text-gray-800 mb-3">Select Ticket Category</p>
+          <div className="space-y-2">
+            {ticketTiers.map((tier) => (
+              <label
+                key={tier.name}
+                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+                  selectedTier === tier.name
+                    ? "border-brand-coral bg-brand-coral/5"
+                    : "border-gray-200 hover:border-brand-coral/50"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="ticketTier"
+                    value={tier.name}
+                    checked={selectedTier === tier.name}
+                    onChange={(e) => setSelectedTier(e.target.value)}
+                    className="accent-brand-coral h-4 w-4"
+                  />
+                  <span className="font-medium text-gray-900">{tier.name}</span>
+                </div>
+                <span className="font-bold text-gray-900">
+                  {currency} {tier.price}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Qty */}
       {showQuantitySelector && (
@@ -263,7 +308,7 @@ export function TicketPurchaseCard({
               setTermsError(true);
               return;
             }
-            onBook({ qty, pointsUsed: pointsToUse });
+            onBook({ qty, pointsUsed: pointsToUse, ...(hasTiers ? { tierName: selectedTier } : {}) });
           }}
           className="w-full font-black uppercase tracking-widest text-sm py-4 shadow-xl shadow-brand-coral/10 hover:shadow-brand-coral/20 transition-all hover:scale-[1.01]"
         >
