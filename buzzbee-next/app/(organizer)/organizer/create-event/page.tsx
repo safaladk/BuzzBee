@@ -180,6 +180,14 @@ function CreateEventContent() {
       setLocalError("Date is required");
       return false;
     }
+
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      setLocalError("Event date cannot be in the past");
+      return false;
+    }
     if (!formData.time) {
       setLocalError("Time is required");
       return false;

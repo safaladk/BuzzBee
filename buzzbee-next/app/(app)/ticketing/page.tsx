@@ -1,6 +1,6 @@
 "use client";
 
-import { useMyBookings, useRequestRefund } from "@/features/bookings/queries";
+import { useMyBookings, useRequestRefund, usePreviewRefund } from "@/features/bookings/queries";
 import {
   Ticket,
   Calendar,
@@ -8,9 +8,10 @@ import {
   Loader2,
   Search,
   RotateCcw,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Booking } from "@/lib/types";
 
@@ -36,6 +37,10 @@ export default function TicketingPage() {
   const [selectedReason, setSelectedReason] = useState("");
   const [customReason, setCustomReason] = useState("");
 
+  const { data: previewData, isLoading: isPreviewLoading } = usePreviewRefund(
+    selectedBooking?.id ?? null
+  );
+
   const handleRefundRequest = (booking: Booking) => {
     setSelectedBooking(booking);
     setIsModalOpen(true);
@@ -43,34 +48,7 @@ export default function TicketingPage() {
     setCustomReason("");
   };
 
-
   const now = useMemo(() => new Date().getTime(), []);
-
-  const refundCalculation = useMemo(() => {
-    if (!selectedBooking) return null;
-    
-    const eventDate = new Date(selectedBooking.event.date).getTime();
-    const diffDays = (eventDate - now) / (1000 * 60 * 60 * 24);
-
-    let refundPercentage = 0;
-    if (diffDays >= 7) {
-      refundPercentage = 0.9;
-    } else if (diffDays >= 3) {
-      refundPercentage = 0.75;
-    } else if (diffDays >= 1) {
-      refundPercentage = 0.5;
-    } else {
-      refundPercentage = 0;
-    }
-
-    const refundAmount = selectedBooking.totalPrice * refundPercentage;
-
-    return {
-      total: selectedBooking.totalPrice,
-      percentage: refundPercentage * 100,
-      amount: refundAmount,
-    };
-  }, [selectedBooking, now]);
 
   const confirmRefund = () => {
     if (!selectedBooking || !selectedReason) return;
@@ -87,6 +65,7 @@ export default function TicketingPage() {
       {
         onSuccess: () => {
           setIsModalOpen(false);
+          alert("Refund successful! Points have been added to your wallet.");
         },
       },
     );
@@ -233,9 +212,14 @@ export default function TicketingPage() {
                       ID: #{booking.id.toString().padStart(4, "0")}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 line-clamp-1 mb-3 group-hover:text-brand-coral transition-colors">
+                  <h3 className="text-lg font-bold text-gray-900 line-clamp-1 mb-1 group-hover:text-brand-coral transition-colors">
                     {booking.event.title}
                   </h3>
+                  {booking.status === "refunded" && booking.refundPolicyApplied && (
+                    <p className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-md mb-2 w-fit">
+                      {booking.refundPolicyApplied} • +{booking.refundAmountPoints} pts
+                    </p>
+                  )}
                   <div className="space-y-2 mb-4 flex-1">
                     <div className="flex items-center text-gray-600 text-sm">
                       <Calendar
@@ -304,34 +288,44 @@ export default function TicketingPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Request Refund"
+        title="Request Cancellation"
         size="md"
       >
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
             <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center text-xs font-black text-slate-400 uppercase tracking-widest">
-              <span>Refund Estimation</span>
-              <span className="text-brand-coral">{refundCalculation?.percentage}% Refund</span>
+              <span>System Approval</span>
+              <span className="text-green-600 flex items-center gap-1">
+                <Zap size={12} fill="currentColor" /> Instant
+              </span>
             </div>
             <div className="p-4 space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Paid Amount</span>
-                <span className="text-slate-900 font-bold">Rs. {selectedBooking?.totalPrice.toLocaleString()}</span>
-              </div>
-              <div className="h-px bg-slate-100 w-full" />
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-slate-900">Points to be returned</span>
-                <span className="text-lg font-black text-brand-coral">{refundCalculation?.amount.toLocaleString()} BuzzBee Points</span>
-              </div>
-              <p className="text-[10px] text-slate-400 italic">
-                * Refunds are processed as BuzzBee points which can be used for future bookings.
-              </p>
+              {isPreviewLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="animate-spin text-brand-coral" size={24} />
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Paid Amount</span>
+                    <span className="text-slate-900 font-bold">Rs. {selectedBooking?.totalPrice.toLocaleString()}</span>
+                  </div>
+                  <div className="h-px bg-slate-100 w-full" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-slate-900">Points to be returned</span>
+                    <span className="text-lg font-black text-brand-coral">{previewData?.points.toLocaleString() || 0} BuzzBee Points</span>
+                  </div>
+                  <p className="text-xs text-brand-coral font-medium bg-brand-coral/5 px-2 py-1 rounded-md text-center">
+                    {previewData?.reason}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
-              Why do you want a refund?
+              Reason for Cancellation
             </label>
             <div className="space-y-2">
               {REFUND_REASONS.map((reason) => (
@@ -377,18 +371,19 @@ export default function TicketingPage() {
               onClick={() => setIsModalOpen(false)}
               className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 text-sm font-bold hover:bg-gray-200 transition-all"
             >
-              Cancel
+              Go Back
             </button>
             <button
               onClick={confirmRefund}
               disabled={
                 !selectedReason ||
                 (selectedReason === "Other" && !customReason.trim()) ||
-                isRequestingRefund
+                isRequestingRefund ||
+                isPreviewLoading
               }
               className="flex-2 py-3 rounded-xl bg-brand-coral text-white text-sm font-bold shadow-md shadow-brand-coral/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
             >
-              {isRequestingRefund ? "Submitting..." : "Confirm Refund Request"}
+              {isRequestingRefund ? "Processing..." : "Confirm Instant Refund"}
             </button>
           </div>
         </div>

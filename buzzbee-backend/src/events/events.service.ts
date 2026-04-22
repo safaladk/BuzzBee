@@ -71,13 +71,24 @@ export class EventsService implements OnModuleInit {
     return event;
   }
 
-  findAll() {
+  findAll(category?: string, location?: string) {
+    const where: FindOptionsWhere<Event> = {
+      isPublished: true,
+      status: 'APPROVED',
+      date: MoreThanOrEqual(new Date()),
+    };
+
+    if (category) {
+      where.category = category;
+    }
+
+    if (location) {
+      where.district = location;
+    }
+
     return this.repo.find({
-      where: {
-        isPublished: true,
-        status: 'APPROVED',
-        date: MoreThanOrEqual(new Date()),
-      },
+      where,
+      order: { date: 'ASC' },
     });
   }
 
@@ -102,7 +113,15 @@ export class EventsService implements OnModuleInit {
   async syncRevenue() {
     const events = await this.repo.find();
     for (const event of events) {
-      event.revenue = Number(event.price) * (event.attendees || 0);
+      const totalPotential = Number(event.price) * (event.attendees || 0);
+      if (event.isSettled) {
+        event.revenue = totalPotential;
+        event.escrowRevenue = 0;
+      } else {
+        // If not settled, most of it should be in escrow
+        event.escrowRevenue = totalPotential;
+        event.revenue = 0;
+      }
       await this.repo.save(event);
     }
     return { success: true, count: events.length };

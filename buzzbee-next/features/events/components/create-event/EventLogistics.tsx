@@ -26,6 +26,7 @@ export function EventLogistics({ formData, onChange }: EventLogisticsProps) {
             name="date"
             value={formData.date}
             onChange={onChange}
+            min={new Date().toISOString().split("T")[0]}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600"
             required
           />

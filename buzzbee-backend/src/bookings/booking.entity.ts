@@ -40,6 +40,9 @@ export class Booking {
   @Column({ type: 'text', nullable: true })
   refundReason: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  refundPolicyApplied: string | null;
+
   @Column({ type: 'timestamp', nullable: true })
   refundRequestedAt: Date;
 

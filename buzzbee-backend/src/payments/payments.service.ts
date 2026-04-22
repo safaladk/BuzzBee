@@ -22,7 +22,7 @@ const MIN_CARD_PAYABLE_RS = Number(process.env.MIN_CARD_PAYABLE_RS || 50);
 
 @Injectable()
 export class PaymentsService {
-  private stripe: Stripe | null;
+  private stripe: any;
 
   constructor(
     @InjectRepository(Event)

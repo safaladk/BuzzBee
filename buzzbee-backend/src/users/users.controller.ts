@@ -7,12 +7,18 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from './user.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -35,6 +41,10 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
+  @ApiOkResponse({
+    description: 'The current user profile has been successfully retrieved.',
+    type: User,
+  })
   getProfile(@Request() req) {
     return this.service.findById(req.user.id);
   }

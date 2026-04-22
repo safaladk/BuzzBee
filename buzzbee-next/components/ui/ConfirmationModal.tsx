@@ -65,14 +65,14 @@ export const ConfirmationModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm">
       <div className="flex flex-col items-center text-center">
-        <div className={`w-16 h-16 ${colors.bg} rounded-full flex items-center justify-center mb-6`}>
+        <div
+          className={`w-16 h-16 ${colors.bg} rounded-full flex items-center justify-center mb-6`}
+        >
           {colors.icon}
         </div>
-        
+
         <h3 className="text-xl font-black text-slate-900 mb-2">{title}</h3>
-        <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-          {message}
-        </p>
+        <p className="text-slate-500 text-sm mb-6 leading-relaxed">{message}</p>
 
         {requiresNote && (
           <div className="w-full mb-6 text-left">
@@ -80,7 +80,7 @@ export const ConfirmationModal = ({
               {notePlaceholder}
             </label>
             <textarea
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-coral/20 min-h-[100px] transition-all"
+              className="w-full p-4 bg-slate-50 text-slate-900 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-coral/20 min-h-[100px] transition-all"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Your note..."

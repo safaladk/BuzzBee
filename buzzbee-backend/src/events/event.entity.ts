@@ -54,6 +54,12 @@ export class Event {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   revenue: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  escrowRevenue: number;
+
+  @Column({ default: false })
+  isSettled: boolean;
+
   @Column({ type: 'int', nullable: true, default: null })
   maxTicketsPerUser: number;
 

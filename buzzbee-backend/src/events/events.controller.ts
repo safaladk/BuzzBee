@@ -78,11 +78,19 @@ import {
   Delete,
   Request,
   UseGuards,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Events')
 @Controller('events')
@@ -90,7 +98,8 @@ export class EventsController {
   constructor(private service: EventsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('organizer', 'admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new event' })
   create(@Request() req: any, @Body() dto: CreateEventDto) {
@@ -98,12 +107,18 @@ export class EventsController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('organizer', 'admin')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update an event' })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateEventDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('organizer', 'admin')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an event' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
@@ -111,8 +126,13 @@ export class EventsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all published events' })
-  findAll() {
-    return this.service.findAll();
+  @ApiQuery({ name: 'category', required: false, type: String })
+  @ApiQuery({ name: 'location', required: false, type: String, description: 'Filter by district/city' })
+  findAll(
+    @Query('category') category?: string,
+    @Query('location') location?: string,
+  ) {
+    return this.service.findAll(category, location);
   }
 
   @Get('my-events')
@@ -136,7 +156,8 @@ export class EventsController {
   }
 
   @Post(':id/cancel')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('organizer', 'admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cancel an event' })
   cancel(@Param('id', ParseIntPipe) id: number, @Request() req: any) {

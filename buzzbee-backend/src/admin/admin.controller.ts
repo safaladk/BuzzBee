@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe, UseGuards, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  Put,
+  Patch,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -24,9 +34,24 @@ export class AdminController {
   verifyEvent(
     @Param('id', ParseIntPipe) id: number,
     @Body('status') status: 'APPROVED' | 'REJECTED',
-    @Body('note') rejectionNote?: string
+    @Body('note') rejectionNote?: string,
   ) {
     return this.service.setEventStatus(id, status, rejectionNote);
+  }
+
+  @Patch('events/:id/approve')
+  @ApiOperation({ summary: 'Approve a pending event' })
+  approveEvent(@Param('id', ParseIntPipe) id: number) {
+    return this.service.setEventStatus(id, 'APPROVED');
+  }
+
+  @Patch('events/:id/reject')
+  @ApiOperation({ summary: 'Reject a pending event' })
+  rejectEvent(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('note') note: string,
+  ) {
+    return this.service.setEventStatus(id, 'REJECTED', note);
   }
 
   @Get('users')

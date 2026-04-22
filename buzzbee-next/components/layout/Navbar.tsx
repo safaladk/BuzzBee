@@ -25,10 +25,6 @@ export const Navbar = () => {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  if (pathname.startsWith("/admin")) {
-    return null;
-  }
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -43,6 +39,10 @@ export const Navbar = () => {
   const { data: notifications = [] } = useNotifications(!!user);
   const { mutate: markRead } = useMarkRead();
   const { mutate: markAllRead } = useMarkAllRead();
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   const unreadCount = notifications.filter((n: Notification) => !n.isRead).length;
 

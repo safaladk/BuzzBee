@@ -60,6 +60,7 @@ export default function SignupPage() {
       return;
     }
     try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await signup({
         fullName: formData.fullName,
         email: formData.email,
@@ -70,7 +71,10 @@ export default function SignupPage() {
       // Redirect to login after successful signup
       router.push("/login");
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Signup failed";
+      const err = e as any;
+      const msg =
+        err?.response?.data?.message ||
+        (e instanceof Error ? e.message : "Signup failed");
       setError(msg);
     } finally {
       setLoading(false);

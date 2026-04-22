@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -126,9 +127,9 @@ export class BookingsService {
 
     const savedBooking = await this.bookingRepo.save(booking);
 
-    // Update attendees and revenue in Event
+    // Update attendees and escrow revenue in Event
     event.attendees += dto.quantity;
-    event.revenue = Number(event.revenue) + Number(event.price) * dto.quantity;
+    event.escrowRevenue = Number(event.escrowRevenue) + computedTotalPrice;
     await this.eventRepo.save(event);
 
     // Notify user
@@ -157,6 +158,60 @@ export class BookingsService {
     });
   }
 
+  async findOne(id: number, userId: number, role: string) {
+    const booking = await this.bookingRepo.findOne({
+      where: { id },
+      relations: ['user', 'event'],
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    // Security Check: Only the owner or an admin can view the booking details
+    if (booking.user.id !== userId && role !== 'admin') {
+      // If user is an organizer, they might see bookings for their OWN events
+      const isOrganizerOfEvent =
+        role === 'organizer' &&
+        booking.event.organizer &&
+        booking.event.organizer.id === userId;
+
+      if (!isOrganizerOfEvent) {
+        throw new ForbiddenException(
+          'You do not have permission to view this booking',
+        );
+      }
+    }
+
+    return booking;
+  }
+
+  async previewRefund(bookingId: number, userId: number) {
+    const booking = await this.bookingRepo.findOne({
+      where: { id: bookingId, user: { id: userId } },
+      relations: ['event'],
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.status !== 'confirmed') {
+      throw new BadRequestException('Only confirmed bookings can be refunded');
+    }
+
+    // Check if event has already passed
+    const eventTime = new Date(booking.event.date).getTime();
+    if (eventTime < Date.now()) {
+      throw new BadRequestException('Cannot preview refund for past events');
+    }
+
+    return this.calculateRefundPoints(
+      booking.totalPrice,
+      booking.event.date,
+    );
+  }
+
   async requestRefund(bookingId: number, userId: number, reason: string) {
     const booking = await this.bookingRepo.findOne({
       where: { id: bookingId, user: { id: userId } },
@@ -177,37 +232,73 @@ export class BookingsService {
       throw new BadRequestException('Cannot request refund for past events');
     }
 
-    // Calculate refund points
-    const refundPoints = this.calculateRefundPoints(
+    // Calculate refund points and auto-approve
+    const refundInfo = this.calculateRefundPoints(
       booking.totalPrice,
       booking.event.date,
     );
 
-    booking.status = 'refund_pending';
+    const event = booking.event;
+    const originalPrice = Number(booking.totalPrice);
+    const refundAmount = refundInfo.points;
+    const organizerKeep = originalPrice - refundAmount;
+
+    // 1. Update Event (Shift funds)
+    event.escrowRevenue = Math.max(0, Number(event.escrowRevenue) - originalPrice);
+    event.revenue = Number(event.revenue) + organizerKeep;
+    event.attendees = Math.max(0, event.attendees - booking.quantity);
+    await this.eventRepo.save(event);
+
+    // 2. Refund User wallet
+    if (refundAmount > 0) {
+      await this.usersService.updatePointsBalance(booking.user.id, refundAmount);
+    }
+
+    // 3. Finalize Booking status
+    booking.status = 'refunded';
     booking.refundReason = reason;
-    booking.refundAmountPoints = refundPoints;
+    booking.refundAmountPoints = refundAmount;
+    booking.refundPolicyApplied = refundInfo.reason;
     booking.refundRequestedAt = new Date();
-    return this.bookingRepo.save(booking);
+    await this.bookingRepo.save(booking);
+
+    // 4. Notify User
+    await this.notificationsService.create(
+      booking.user,
+      `Refund processed: ${refundAmount} points returned for "${event.title}". ${refundInfo.reason}`,
+    );
+
+    return booking;
   }
 
-  private calculateRefundPoints(totalPrice: number, eventDate: Date): number {
+  private calculateRefundPoints(
+    totalPrice: number,
+    eventDate: Date,
+  ): { points: number; reason: string } {
     const now = new Date().getTime();
     const eventTime = new Date(eventDate).getTime();
     const diffMs = eventTime - now;
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
     let refundPercent = 0;
+    let reason = '';
+
     if (diffDays >= 7) {
       refundPercent = 0.9;
+      reason = '7+ days before event (90% policy applied)';
     } else if (diffDays >= 3) {
       refundPercent = 0.75;
+      reason = '3+ days before event (75% policy applied)';
     } else if (diffDays >= 1) {
       refundPercent = 0.5;
+      reason = '24h+ before event (50% policy applied)';
     } else {
-      refundPercent = 0; // Less than 24h
+      refundPercent = 0;
+      reason = 'Less than 24h before event (No refund)';
     }
 
-    return Number((Number(totalPrice) * refundPercent).toFixed(2));
+    const points = Number((Number(totalPrice) * refundPercent).toFixed(2));
+    return { points, reason };
   }
 
   async getPendingRefunds() {
@@ -267,6 +358,7 @@ export class BookingsService {
   }
 
   async refundAllForEvent(eventId: number) {
+    const event = await this.eventRepo.findOne({ where: { id: eventId } });
     const bookings = await this.bookingRepo.find({
       where: { event: { id: eventId }, status: 'confirmed' },
       relations: ['user', 'event'],
@@ -278,6 +370,7 @@ export class BookingsService {
 
       booking.status = 'refunded';
       booking.refundAmountPoints = refundPoints;
+      booking.refundPolicyApplied = 'Event cancelled (100% refund)';
       await this.bookingRepo.save(booking);
 
       await this.usersService.updatePointsBalance(
@@ -289,6 +382,12 @@ export class BookingsService {
         booking.user,
         `The event "${booking.event.title}" was cancelled. 100% of your payment (${refundPoints} BuzzBee points) has been returned to your wallet.`,
       );
+    }
+
+    if (event) {
+      event.escrowRevenue = 0;
+      event.attendees = 0;
+      await this.eventRepo.save(event);
     }
   }
 }

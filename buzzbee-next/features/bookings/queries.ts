@@ -49,3 +49,11 @@ export const useProcessRefund = () => {
     },
   });
 };
+
+export const usePreviewRefund = (id: number | null) => {
+  return useQuery({
+    queryKey: ['bookings', 'preview', id],
+    queryFn: () => bookingService.previewRefund(id!),
+    enabled: !!id,
+  });
+};

@@ -1,32 +1,24 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import {
-  Users,
-  Calendar,
-  ShieldCheck,
-  DollarSign,
-  TrendingUp,
-  Bell,
-  Search,
-} from "lucide-react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
-import StatCard from "@/components/admin/StatCard";
-import QueueCard from "@/components/admin/QueueCard";
-import { useStats } from "@/features/stats/queries";
+import { useState } from 'react';
+import { Users, Calendar, ShieldCheck, DollarSign, TrendingUp, Bell, Search } from 'lucide-react';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import StatCard from '@/components/admin/StatCard';
+import QueueCard from '@/components/admin/QueueCard';
+import { useStats } from '@/features/stats/queries';
 import {
   usePendingEvents,
   useVerifyEvent,
   usePendingOrganizers,
   useVerifyOrganizer,
-} from "@/features/admin/queries";
-import { usePendingRefunds, useProcessRefund } from "@/features/bookings/queries";
-import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
+} from '@/features/admin/queries';
+import { usePendingRefunds, useProcessRefund } from '@/features/bookings/queries';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
 export default function AdminDashboardOverview() {
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
-    type: "info" | "danger" | "warning";
+    type: 'info' | 'danger' | 'warning';
     title: string;
     message: string;
     confirmText?: string;
@@ -35,9 +27,9 @@ export default function AdminDashboardOverview() {
     notePlaceholder?: string;
   }>({
     isOpen: false,
-    type: "info",
-    title: "",
-    message: "",
+    type: 'info',
+    title: '',
+    message: '',
     onConfirm: () => {},
   });
 
@@ -53,10 +45,10 @@ export default function AdminDashboardOverview() {
   const triggerConfirm = (options: Partial<typeof confirmModal>) => {
     setConfirmModal({
       isOpen: true,
-      type: "info",
-      title: "Are you sure?",
-      message: "This action cannot be undone.",
-      confirmText: "Confirm",
+      type: 'info',
+      title: 'Are you sure?',
+      message: 'This action cannot be undone.',
+      confirmText: 'Confirm',
       onConfirm: () => {},
       ...options,
     });
@@ -64,34 +56,53 @@ export default function AdminDashboardOverview() {
 
   const stats = [
     {
-      label: "Total Users",
-      value: platformStats ? platformStats.usersCount.toLocaleString() : "...",
+      label: 'Total Users',
+      value: platformStats ? platformStats.usersCount.toLocaleString() : '...',
       change: `${pendingOrganizers?.length ?? 0} organizer apps pending`,
       icon: Users,
-      accentClass: "bg-blue-100 text-blue-600",
+      accentClass: 'bg-blue-100 text-blue-600',
     },
     {
-      label: "Total Events",
-      value: platformStats ? platformStats.eventsCount.toLocaleString() : "...",
+      label: 'Total Events',
+      value: platformStats ? platformStats.eventsCount.toLocaleString() : '...',
       change: `${pendingEvents?.length ?? 0} waiting for review`,
       icon: Calendar,
-      accentClass: "bg-brand-peach/20 text-brand-coral",
+      accentClass: 'bg-brand-peach/20 text-brand-coral',
     },
     {
-      label: "Organizers",
-      value: platformStats ? platformStats.organizersCount.toLocaleString() : "...",
+      label: 'Organizers',
+      value: platformStats ? platformStats.organizersCount.toLocaleString() : '...',
       change: `${platformStats?.citiesCount ?? 0} cities covered`,
       icon: ShieldCheck,
-      accentClass: "bg-amber-100 text-amber-700",
+      accentClass: 'bg-amber-100 text-amber-700',
     },
     {
-      label: "Revenue",
-      value: platformStats
-        ? `Rs. ${platformStats.totalRevenue.toLocaleString()}`
-        : "...",
-      change: `${pendingRefunds?.length ?? 0} refund requests`,
+      label: 'Platform Revenue',
+      value: platformStats ? `Rs. ${platformStats.totalRevenue.toLocaleString()}` : '...',
+      change: 'Global platform potential',
+      icon: TrendingUp,
+      accentClass: 'bg-emerald-100 text-emerald-700',
+    },
+    {
+      label: 'Total Settelement',
+      value: platformStats ? `Rs. ${platformStats.totalEscrow.toLocaleString()}` : '...',
+      change: 'Funds waiting for settlement',
       icon: DollarSign,
-      accentClass: "bg-emerald-100 text-emerald-700",
+      accentClass: 'bg-amber-100 text-amber-700',
+    },
+    {
+      label: 'Settled to Orgs',
+      value: platformStats ? `Rs. ${platformStats.totalSettled.toLocaleString()}` : '...',
+      change: 'Funds disbursed to organizers',
+      icon: ShieldCheck,
+      accentClass: 'bg-blue-100 text-blue-600',
+    },
+    {
+      label: 'Total Refunded',
+      value: platformStats ? `Rs. ${platformStats.totalRefunded.toLocaleString()}` : '...',
+      change: 'Points returned to attendees',
+      icon: Bell,
+      accentClass: 'bg-brand-peach/20 text-brand-coral',
     },
   ];
 
@@ -100,7 +111,7 @@ export default function AdminDashboardOverview() {
       id: Number(event.id),
       title: event.title,
       subtitle: `${event.category} • ${event.district}`,
-      avatarFallback: event.title[0]?.toUpperCase() || "E",
+      avatarFallback: event.title[0]?.toUpperCase() || 'E',
     })) ?? [];
 
   const refundQueueItems =
@@ -108,8 +119,8 @@ export default function AdminDashboardOverview() {
       id: Number(booking.id),
       title: booking.user.fullName,
       subtitle: `Rs. ${booking.totalPrice.toLocaleString()} • ${booking.event.title}`,
-      note: booking.refundReason || "No reason provided",
-      avatarFallback: booking.user.fullName[0]?.toUpperCase() || "R",
+      note: booking.refundReason || 'No reason provided',
+      avatarFallback: booking.user.fullName[0]?.toUpperCase() || 'R',
     })) ?? [];
 
   const organizerQueueItems =
@@ -118,7 +129,7 @@ export default function AdminDashboardOverview() {
       title: user.fullName,
       subtitle: user.email,
       docs: user.verificationDocs,
-      avatarFallback: user.fullName[0]?.toUpperCase() || "O",
+      avatarFallback: user.fullName[0]?.toUpperCase() || 'O',
     })) ?? [];
 
   const recentActivity = [
@@ -167,7 +178,7 @@ export default function AdminDashboardOverview() {
               <Bell size={16} />
               {notificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-brand-coral text-[9px] font-black text-white flex items-center justify-center">
-                  {notificationCount > 9 ? "9+" : notificationCount}
+                  {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
               )}
             </button>
@@ -203,9 +214,9 @@ export default function AdminDashboardOverview() {
                 }
 
                 triggerConfirm({
-                  title: "Approve Event",
+                  title: 'Approve Event',
                   message: `Are you sure you want to approve \"${event.title}\"?`,
-                  onConfirm: () => verifyEvent({ id, status: "APPROVED" }),
+                  onConfirm: () => verifyEvent({ id, status: 'APPROVED' }),
                 });
               }}
               onReject={(id) => {
@@ -215,11 +226,11 @@ export default function AdminDashboardOverview() {
                 }
 
                 triggerConfirm({
-                  title: "Reject Event",
+                  title: 'Reject Event',
                   message: `Please provide a reason for rejecting \"${event.title}\".`,
-                  type: "danger",
+                  type: 'danger',
                   requiresNote: true,
-                  onConfirm: (note) => verifyEvent({ id, status: "REJECTED", note }),
+                  onConfirm: (note) => verifyEvent({ id, status: 'REJECTED', note }),
                 });
               }}
             />
@@ -235,9 +246,9 @@ export default function AdminDashboardOverview() {
                 }
 
                 triggerConfirm({
-                  title: "Approve Refund",
+                  title: 'Approve Refund',
                   message: `Approve refund of Rs. ${booking.totalPrice.toLocaleString()} for ${booking.user.fullName}?`,
-                  onConfirm: () => processRefund({ id, status: "refunded" }),
+                  onConfirm: () => processRefund({ id, status: 'refunded' }),
                 });
               }}
               onReject={(id) => {
@@ -247,10 +258,10 @@ export default function AdminDashboardOverview() {
                 }
 
                 triggerConfirm({
-                  title: "Reject Refund",
-                  message: "Are you sure you want to reject this refund request?",
-                  type: "danger",
-                  onConfirm: () => processRefund({ id, status: "refund_rejected" }),
+                  title: 'Reject Refund',
+                  message: 'Are you sure you want to reject this refund request?',
+                  type: 'danger',
+                  onConfirm: () => processRefund({ id, status: 'refund_rejected' }),
                 });
               }}
             />
@@ -266,7 +277,7 @@ export default function AdminDashboardOverview() {
                 }
 
                 triggerConfirm({
-                  title: "Approve Organizer",
+                  title: 'Approve Organizer',
                   message: `Verify and approve ${user.fullName} as an authorized organizer?`,
                   onConfirm: () => verifyOrganizer({ id, verify: true }),
                 });
@@ -278,9 +289,9 @@ export default function AdminDashboardOverview() {
                 }
 
                 triggerConfirm({
-                  title: "Reject Organizer",
+                  title: 'Reject Organizer',
                   message: `Are you sure you want to reject the application for ${user.fullName}?`,
-                  type: "danger",
+                  type: 'danger',
                   onConfirm: () => verifyOrganizer({ id, verify: false }),
                 });
               }}

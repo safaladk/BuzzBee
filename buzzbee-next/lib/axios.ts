@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Cookies from 'js-cookie';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { toast } from './toast-service';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3001',
@@ -29,15 +30,17 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // Unauthorized → logout
-          console.error('Unauthorized:', message);
-
-          // Cookies.remove('token');
-          // window.location.href = '/sign-in';
+          // Unauthorized → toast & redirect (only if not already on login/signup)
+          toast.error('Session expired. Please login again.');
+          if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+            window.location.href = '/login';
+          }
           break;
 
         case 403:
-          console.error('Forbidden:', message);
+          // Forbidden → toast & redirect
+          toast.error('Permission Denied: You do not have the required role.');
+          window.location.href = '/login';
           break;
 
         case 404:
@@ -45,7 +48,7 @@ api.interceptors.response.use(
           break;
 
         case 500:
-          console.error('Server error:', message);
+          toast.error('Server error: Something went wrong on our end.');
           break;
 
         default:
@@ -60,6 +63,7 @@ api.interceptors.response.use(
       });
     }
 
+    toast.error('Network error. Please check your connection.');
     return Promise.reject({
       status: 0,
       message: 'Network error. Please check your internet connection.',

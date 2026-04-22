@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import { Event } from "@/lib/types";
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+import { Event } from '@/lib/types';
 import {
   Calendar,
   MapPin,
@@ -17,10 +17,10 @@ import {
   CheckCircle,
   AlertTriangle,
   Loader2,
-} from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import Link from "next/link";
-import { Modal } from "@/components/ui/Modal";
+} from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import Link from 'next/link';
+import { Modal } from '@/components/ui/Modal';
 
 export default function EventDetailsPage() {
   const { id } = useParams();
@@ -43,14 +43,14 @@ export default function EventDetailsPage() {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/events/my-events?_=${Date.now()}`,
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get('token')}`,
           },
-          cache: "no-store",
+          cache: 'no-store',
         },
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch event data.");
+        throw new Error('Failed to fetch event data.');
       }
 
       const data = await response.json();
@@ -58,15 +58,13 @@ export default function EventDetailsPage() {
       const foundEvent = events.find((e: any) => String(e.id) === String(id));
 
       if (!foundEvent) {
-        throw new Error(
-          "Event not found or you don't have permission to view it.",
-        );
+        throw new Error("Event not found or you don't have permission to view it.");
       }
 
       setEvent(foundEvent);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load event");
+      setError(err instanceof Error ? err.message : 'Failed to load event');
     } finally {
       setLoading(false);
     }
@@ -85,28 +83,26 @@ export default function EventDetailsPage() {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/events/${event.id}/request-sponsor`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get('token')}`,
           },
         },
       );
 
       if (!response.ok) {
-        throw new Error("Failed to request boost");
+        throw new Error('Failed to request boost');
       }
 
       setBoostSuccess(true);
-      setEvent((prev) =>
-        prev ? { ...prev, sponsorshipStatus: "PENDING" } : prev,
-      );
+      setEvent((prev) => (prev ? { ...prev, sponsorshipStatus: 'PENDING' } : prev));
 
       setTimeout(() => {
         setBoostModalOpen(false);
         setBoostSuccess(false);
       }, 3000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Request failed");
+      alert(err instanceof Error ? err.message : 'Request failed');
     } finally {
       setBoosting(false);
     }
@@ -119,23 +115,23 @@ export default function EventDetailsPage() {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/events/${event.id}/cancel`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get('token')}`,
           },
         },
       );
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || "Failed to cancel event");
+        throw new Error(data.message || 'Failed to cancel event');
       }
 
       setCancelModalOpen(false);
       await fetchEvent(); // Refresh data
-      alert("Event has been cancelled and all attendees have been refunded in BuzzBee points.");
+      alert('Event has been cancelled and all attendees have been refunded in BuzzBee points.');
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Cancellation failed");
+      alert(err instanceof Error ? err.message : 'Cancellation failed');
     } finally {
       setCancelling(false);
     }
@@ -153,7 +149,7 @@ export default function EventDetailsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Oops!</h2>
-        <p className="text-red-500 mb-6">{error || "Event not found"}</p>
+        <p className="text-red-500 mb-6">{error || 'Event not found'}</p>
         <Link href="/organizer/dashboard">
           <Button variant="primary">Back to Dashboard</Button>
         </Link>
@@ -162,18 +158,16 @@ export default function EventDetailsPage() {
   }
 
   const isBoostEligible =
-    !event.isSponsored &&
-    event.sponsorshipStatus !== "PENDING" &&
-    event.status === "APPROVED";
+    !event.isSponsored && event.sponsorshipStatus !== 'PENDING' && event.status === 'APPROVED';
 
-  const canCancel = event.status !== "CANCELLED";
+  const canCancel = event.status !== 'CANCELLED';
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation */}
         <button
-          onClick={() => router.push("/organizer/dashboard")}
+          onClick={() => router.push('/organizer/dashboard')}
           className="flex items-center text-gray-600 hover:text-gray-900 transition mb-6"
         >
           <ArrowLeft size={20} className="mr-2" />
@@ -194,12 +188,12 @@ export default function EventDetailsPage() {
                 No Image
               </div>
             )}
-            {event.status === "APPROVED" && event.isPublished && (
+            {event.status === 'APPROVED' && event.isPublished && (
               <div className="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                 Published
               </div>
             )}
-            {event.status === "CANCELLED" && (
+            {event.status === 'CANCELLED' && (
               <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                 Cancelled
               </div>
@@ -213,9 +207,7 @@ export default function EventDetailsPage() {
           <div className="md:w-2/3 p-8 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start">
-                <h1 className="text-3xl font-extrabold text-gray-900 mb-4">
-                  {event.title}
-                </h1>
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-4">{event.title}</h1>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
@@ -225,7 +217,7 @@ export default function EventDetailsPage() {
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Clock className="mr-2 text-indigo-500" size={20} />
-                  <span>{event.time || "TBD"}</span>
+                  <span>{event.time || 'TBD'}</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <MapPin className="mr-2 text-indigo-500" size={20} />
@@ -241,18 +233,15 @@ export default function EventDetailsPage() {
             </div>
 
             <div className="flex flex-wrap gap-4 border-t border-gray-100 pt-6">
-              {event.status !== "CANCELLED" && (
+              {event.status !== 'CANCELLED' && (
                 <Link href={`/organizer/create-event?id=${event.id}`}>
-                  <Button
-                    variant="outline"
-                    className="bg-white text-gray-700"
-                  >
+                  <Button variant="outline" className="bg-white text-gray-700">
                     Edit Event
                   </Button>
                 </Link>
               )}
 
-              {isBoostEligible && event.status !== "CANCELLED" && (
+              {isBoostEligible && event.status !== 'CANCELLED' && (
                 <Button
                   className="bg-linear-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 border-none shadow-lg transition-all"
                   icon={<Zap size={18} />}
@@ -261,7 +250,7 @@ export default function EventDetailsPage() {
                   Boost Event
                 </Button>
               )}
-              
+
               {canCancel && (
                 <Button
                   variant="outline"
@@ -275,6 +264,31 @@ export default function EventDetailsPage() {
           </div>
         </div>
 
+        {event.status === 'REJECTED' && event.rejectionNote && (
+          <div className="mb-8 rounded-2xl bg-red-50 border border-red-200 p-6 flex items-start gap-4 shadow-sm animate-in fade-in slide-in-from-top-4">
+            <div className="bg-red-100 p-3 rounded-xl shrink-0 mt-1">
+              <AlertTriangle size={24} className="text-red-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-red-800">Event Rejected</h3>
+              <p className="text-sm text-red-700 mt-1 whitespace-pre-line leading-relaxed">
+                <span className="font-semibold">Admin Note: </span>
+                {event.rejectionNote}
+              </p>
+              <div className="mt-4 flex gap-3 items-center">
+                <Link href={`/organizer/create-event?id=${event.id}`}>
+                  <Button
+                    variant="outline"
+                    className="bg-white text-red-700 border-red-300 hover:bg-red-50 hover:border-red-400 text-xs py-1.5 h-8"
+                  >
+                    Edit Event to Fix Issues
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">
@@ -283,30 +297,31 @@ export default function EventDetailsPage() {
             </div>
             <p className="text-gray-500 text-sm font-medium mb-1">Attendees</p>
             <p className="text-2xl font-bold text-gray-900">
-              {event.attendees || 0} / {event.capacity || "Unlimited"}
+              {event.attendees || 0} / {event.capacity || 'Unlimited'}
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">
             <div className="bg-green-50 text-green-600 p-3 rounded-full mb-3">
               <DollarSign size={24} />
             </div>
-            <p className="text-gray-500 text-sm font-medium mb-1">
-              Ticket Price
-            </p>
+            <p className="text-gray-500 text-sm font-medium mb-1">Ticket Price</p>
             <p className="text-2xl font-bold text-gray-900">
-              {Number(event.price) > 0 ? `Rs. ${event.price}` : "Free"}
+              {Number(event.price) > 0 ? `Rs. ${event.price}` : 'Free'}
             </p>
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">
-            <div className="bg-blue-50 text-blue-600 p-3 rounded-full mb-3">
-              <DollarSign size={24} />
+            <div className="bg-green-50 text-green-600 p-3 rounded-full mb-3">
+              <CheckCircle size={24} />
             </div>
-            <p className="text-gray-500 text-sm font-medium mb-1">
-              Total Revenue
-            </p>
-            <p className="text-2xl font-bold text-gray-900">
-              Rs. {event.revenue || 0}
-            </p>
+            <p className="text-gray-500 text-sm font-medium mb-1">Settled Revenue</p>
+            <p className="text-2xl font-bold text-green-600">Rs. {event.revenue || 0}</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">
+            <div className="bg-amber-50 text-amber-600 p-3 rounded-full mb-3">
+              <Clock size={24} />
+            </div>
+            <p className="text-gray-500 text-sm font-medium mb-1">Pending Settlement</p>
+            <p className="text-2xl font-bold text-amber-600">Rs. {event.escrowRevenue || 0}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center">
             <div className="bg-purple-50 text-purple-600 p-3 rounded-full mb-3">
@@ -314,7 +329,7 @@ export default function EventDetailsPage() {
             </div>
             <p className="text-gray-500 text-sm font-medium mb-1">Status</p>
             <p
-              className={`text-xl font-bold ${event.status === "APPROVED" ? "text-green-600" : event.status === "PENDING" ? "text-yellow-600" : "text-red-600"}`}
+              className={`text-xl font-bold ${event.status === 'APPROVED' ? 'text-green-600' : event.status === 'PENDING' ? 'text-yellow-600' : 'text-red-600'}`}
             >
               {event.status}
             </p>
@@ -323,11 +338,9 @@ export default function EventDetailsPage() {
 
         {/* Description Section */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            About the Event
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">About the Event</h2>
           <p className="text-gray-600 whitespace-pre-line leading-relaxed">
-            {event.description || "No description provided."}
+            {event.description || 'No description provided.'}
           </p>
         </div>
       </div>
@@ -343,9 +356,7 @@ export default function EventDetailsPage() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="text-green-600" size={32} />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Request Submitted!
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Request Submitted!</h3>
             <p className="text-gray-600">
               Your boost request has been successfully sent to the admin.
             </p>
@@ -358,9 +369,7 @@ export default function EventDetailsPage() {
               </div>
               <div>
                 <h4 className="font-bold text-amber-900">Premium Placement</h4>
-                <p className="text-sm text-amber-700">
-                  Reach up to 10x more attendees
-                </p>
+                <p className="text-sm text-amber-700">Reach up to 10x more attendees</p>
               </div>
             </div>
 
@@ -369,14 +378,12 @@ export default function EventDetailsPage() {
               <li>Submit your boost request to our admin team.</li>
               <li>Our team will review your event for eligibility.</li>
               <li>
-                <strong className="text-gray-900">
-                  The admin will contact you
-                </strong>{" "}
-                regarding approval and the associated fee processing.
+                <strong className="text-gray-900">The admin will contact you</strong> regarding
+                approval and the associated fee processing.
               </li>
               <li>
-                Once confirmed and processed, your event will be featured
-                prominently on the attendee homepage.
+                Once confirmed and processed, your event will be featured prominently on the
+                attendee homepage.
               </li>
             </ul>
 
@@ -394,7 +401,7 @@ export default function EventDetailsPage() {
                 onClick={requestBoost}
                 disabled={boosting}
               >
-                {boosting ? "Submitting..." : "Submit Request"}
+                {boosting ? 'Submitting...' : 'Submit Request'}
               </Button>
             </div>
           </div>
@@ -419,9 +426,15 @@ export default function EventDetailsPage() {
           </div>
 
           <p className="text-gray-600 mb-6 font-medium">
-            Are you sure you want to cancel <span className="font-black text-gray-900">&quot;{event.title}&quot;</span>? 
-            <br /><br />
-            By cancelling, all confirmed attendees will be automatically notified and <span className="text-red-600 font-bold">100% of their ticket price</span> will be refunded as <span className="bg-brand-coral/10 text-brand-coral px-1 rounded">BuzzBee points</span> to their wallet.
+            Are you sure you want to cancel{' '}
+            <span className="font-black text-gray-900">&quot;{event.title}&quot;</span>?
+            <br />
+            <br />
+            By cancelling, all confirmed attendees will be automatically notified and{' '}
+            <span className="text-red-600 font-bold">100% of their ticket price</span> will be
+            refunded as{' '}
+            <span className="bg-brand-coral/10 text-brand-coral px-1 rounded">BuzzBee points</span>{' '}
+            to their wallet.
           </p>
 
           <div className="flex gap-3 pt-4 border-t border-gray-100">
@@ -443,7 +456,9 @@ export default function EventDetailsPage() {
                   <Loader2 className="animate-spin" size={16} />
                   Cancelling...
                 </div>
-              ) : "Yes, Cancel Event"}
+              ) : (
+                'Yes, Cancel Event'
+              )}
             </Button>
           </div>
         </div>

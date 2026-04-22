@@ -20,6 +20,8 @@ export interface Event {
   capacity?: number;
   serviceFee?: number;
   revenue?: number;
+  escrowRevenue?: number;
+  isSettled?: boolean;
   maxTicketsPerUser?: number;
   highlights?: string;
   isSponsored?: boolean;
@@ -81,6 +83,9 @@ export interface PlatformStats {
   organizersCount: number;
   citiesCount: number;
   totalRevenue: number;
+  totalEscrow: number;
+  totalSettled: number;
+  totalRefunded: number;
 }
 
 export interface Booking {
@@ -91,6 +96,8 @@ export interface Booking {
   totalPrice: number;
   status: 'pending' | 'confirmed' | 'refund_pending' | 'refunded' | 'refund_rejected';
   refundReason?: string;
+  refundAmountPoints?: number;
+  refundPolicyApplied?: string;
   createdAt: string;
 }
 

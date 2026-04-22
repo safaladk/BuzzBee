@@ -18,4 +18,6 @@ export const bookingService = {
     get<Booking[]>('/bookings/admin/pending-refunds'),
   processRefund: (id: number, status: 'refunded' | 'refund_rejected') => 
     patch<Booking>(`/bookings/${id}/admin/process-refund`, { status }),
+  previewRefund: (id: number) => 
+    get<{ points: number; reason: string }>(`/bookings/${id}/preview-refund`),
 };

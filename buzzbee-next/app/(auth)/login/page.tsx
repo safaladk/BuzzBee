@@ -24,12 +24,16 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await login({ email, password });
       await refreshUser();
       // Redirect after successful login
       router.push("/");
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Login failed";
+      const err = e as any;
+      const msg =
+        err?.response?.data?.message ||
+        (e instanceof Error ? e.message : "Login failed");
       setError(msg);
     } finally {
       setLoading(false);

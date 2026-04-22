@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/app/providers/auth-provider";
 import QueryProvider from "@/app/providers/react-query-provider";
+import { ToastProvider } from "@/app/providers/ToastProvider";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -26,9 +27,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="bg-gray-50 text-gray-900">
         <QueryProvider>
           <AuthProvider>
-            <Navbar />
-            {children}
-            <Footer />
+            <ToastProvider>
+              <Navbar />
+              {children}
+              <Footer />
+            </ToastProvider>
           </AuthProvider>
         </QueryProvider>
       </body>
